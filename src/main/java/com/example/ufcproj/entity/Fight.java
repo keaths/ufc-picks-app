@@ -57,4 +57,7 @@ public class Fight {
     public enum WinnerCorner {
         RED, BLUE, DRAW, NC
     }
+
+    @OneToMany(mappedBy = "fight")
+    private List<Pick> picks;
 }

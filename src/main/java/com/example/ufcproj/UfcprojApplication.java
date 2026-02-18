@@ -18,6 +18,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import javax.print.Doc;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -40,6 +41,7 @@ public class UfcprojApplication {
 //			getFighters(fighterRepository);
 //			getEvents(eventRepository);
 			getFightDetails(fighterRepository, eventRepository, fightRepository, roundRepository);
+//			getFighterHeadshots(fighterRepository);
 		};
     }
 
@@ -129,12 +131,13 @@ public class UfcprojApplication {
 					Document eventFightPage = Jsoup.connect(eventLinks.get(i)).get();
 					eventConnected = true;
 					String eventTitle = eventFightPage.select("h2 span").text().trim();
-//					Event foundEvent = eventRepository.findByEventName(eventTitle);
+					Event foundEvent = eventRepository.findByEventName(eventTitle);
 
-//					if(!fightRepository.findByEvent_EventId(foundEvent.getEventId()).isEmpty()){
-//						System.out.println(eventTitle + " parsed, continuing...");
-//						continue;
-//					}
+					if(!fightRepository.findByEvent_EventId(foundEvent.getEventId()).isEmpty()){
+						System.out.println(eventTitle + " parsed, continuing...");
+						continue;
+					}
+					//this^
 					System.out.println("Parsing " + eventTitle);
 
 					ArrayList<Element> fights = eventFightPage.select("tbody tr p:nth-child(1) a.b-flag");
@@ -181,15 +184,22 @@ public class UfcprojApplication {
 								}
 
 								String fightWinner = null;
+								String possDraw = null;
 								try{
 									fightWinner = fightPage.select("i.b-fight-details__person-status_style_green + div h3 a").text().trim();
+									possDraw = fightPage.select("div.b-fight-details__person:nth-child(1) i").text().trim();
+
 								} catch (RuntimeException e){
 
 								}
 								if(fightWinner.contains(redFighter.getFirstName()) && fightWinner.contains(redFighter.getLastName())){
 									fight.setWinnerCorner(Fight.WinnerCorner.RED);
-								} else{
+								} else if(fightWinner.contains(blueFighter.getFirstName()) && fightWinner.contains(blueFighter.getLastName())){
 									fight.setWinnerCorner(Fight.WinnerCorner.BLUE);
+								} else if(possDraw.equals("D")){
+									fight.setWinnerCorner(Fight.WinnerCorner.DRAW);
+								} else{
+									fight.setWinnerCorner(Fight.WinnerCorner.NC);
 								}
 								fight.setMethod(fightPage.select("i.b-fight-details__text-item_first i:nth-child(2)").text().trim());
 								Fight savedFight = fightRepository.save(fight);
@@ -244,6 +254,46 @@ public class UfcprojApplication {
 			}
 			eventConnected = false;
 			System.out.println((i + 1) + " events of " + eventLinks.size() + " added");
+		}
+	}
+
+	public static void getFighterHeadshots(FighterRepository fighterRepository) throws IOException, InterruptedException {
+
+		boolean pageConnect = false;
+		for(int i = 0; i < 283; i++){
+			while(!pageConnect){
+				try{
+					Document fighterPage = Jsoup.connect("https://www.ufc.com/athletes/all?page=" + (i + 1)).get();
+					pageConnect = true;
+					ArrayList<Element> fighterEls = fighterPage.select("div.item-list li.l-flex__item");
+					for(int x = 0; x < fighterEls.size(); x++){
+						String fullName = fighterEls.get(x).select("div.c-listing-athlete__text span.c-listing-athlete__name").text().trim().replace(" ", "");
+						String weight = fighterEls.get(x).select("span.c-listing-athlete__title div.field__item").text().trim().replace(" ", "").replace("-", "");
+						String fullStat = fullName + weight;
+						Fighter fighter = new Fighter();
+						try{
+							fighter = fighterRepository.findByFirstNameAndLastName(fullName);
+						}
+						catch (RuntimeException e){
+							fighter = fighterRepository.findByFirstNameAndLastNameAndWeight(fullStat);
+						}
+                        if(fighter != null && fighter.getHeadshotUrl() == null){
+							String src = fighterEls.get(x).select("div.c-listing-athlete__thumbnail img").attr("src");
+							if(!src.contains("ufc.com")){
+								fighter.setHeadshotUrl("https://www.ufc.com/themes/custom/ufc/assets/img/no-profile-image.png");
+							} else{
+								fighter.setHeadshotUrl(fighterEls.get(x).select("div.c-listing-athlete__thumbnail img").attr("src"));
+							}
+							fighterRepository.save(fighter);
+						}
+                    }
+				} catch (HttpStatusException e){
+					System.out.println("Connection failed, retrying...");
+					Thread.sleep(1500);
+				}
+			}
+			pageConnect = false;
+			System.out.println((i + 1) + " of 283 pages done");
 		}
 	}
 
