@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "picks")
@@ -38,4 +39,30 @@ public class Pick {
 
     @Column(name = "updated_at")
     private LocalDate updatedAt;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private PickStatus status;
+
+    @Column(name = "invalid_reason")
+    private String invalidReason;
+
+    @Column(name = "invalidated_at")
+    private LocalDateTime invalidatedAt;
+
+    @Column(name = "pick_result")
+    private PickResult pickResult;
+
+    public enum PickStatus {
+        VALID,
+        LOCKED,
+        INVALID
+    }
+
+    public enum PickResult {
+        PENDING,
+        WIN,
+        LOSS,
+        NO_CONTEST
+    }
 }

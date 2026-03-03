@@ -29,8 +29,12 @@ public class Event {
     @ToString.Exclude
     private List<Fight> fights;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
+
+    @Column(name = "stats_id")
+    private String statsId;
 
     public enum Status {
         SCHEDULED, COMPLETED, IN_PROGRESS

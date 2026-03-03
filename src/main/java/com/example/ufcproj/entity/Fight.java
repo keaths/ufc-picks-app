@@ -51,11 +51,22 @@ public class Fight {
     @Column(name = "is_title_bout")
     private Boolean isTitleBout = false;
 
+    @Column(name = "stats_id")
+    private String statsId;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Status status;
+
     @OneToMany(mappedBy = "fight", cascade = CascadeType.ALL)
     private List<Round> rounds;
 
     public enum WinnerCorner {
         RED, BLUE, DRAW, NC
+    }
+
+    public enum Status {
+        SCHEDULED, CANCELLED, COMPLETED
     }
 
     @OneToMany(mappedBy = "fight")

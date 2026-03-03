@@ -25,5 +25,7 @@ public interface FightRepository extends JpaRepository <Fight, Long> {
             "where fight_id = :fightId", nativeQuery = true)
     Fight findByFightId(@Param("fightId") Long fightId);
 
-    List<Fight> findByEvent_EventId(Long eventId);
+    List<Fight> findByEvent_EventIdAndStatus(Long eventId, Fight.Status status);
+
+    Fight findByStatsId(String statsId);
 }
