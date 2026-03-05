@@ -2,6 +2,7 @@ package com.example.ufcproj.jobs;
 
 import com.example.ufcproj.entity.*;
 import com.example.ufcproj.repository.*;
+import com.example.ufcproj.service.PickService;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,6 +29,7 @@ public class UfcUpdateJobService {
     private final UserRepository userRepository;
     private final PicksRepository picksRepository;
     private final NotificationsRepository notificationsRepository;
+    private final PickService pickService;
 
     public UfcUpdateJobService(
             FighterRepository fighterRepository,
@@ -36,7 +38,8 @@ public class UfcUpdateJobService {
             FightRepository fightRepository,
             UserRepository userRepository,
             PicksRepository picksRepository,
-            NotificationsRepository notificationsRepository
+            NotificationsRepository notificationsRepository,
+            PickService pickService
     ) {
         this.fighterRepository = fighterRepository;
         this.eventRepository = eventRepository;
@@ -45,6 +48,7 @@ public class UfcUpdateJobService {
         this.userRepository = userRepository;
         this.picksRepository = picksRepository;
         this.notificationsRepository = notificationsRepository;
+        this.pickService = pickService;
     }
 
     @Transactional
@@ -77,9 +81,15 @@ public class UfcUpdateJobService {
         for (Fight updatedFight : fights) {
             Document fightPage = fetchFightDetailsWithRetry(updatedFight.getStatsId());
             if(isFightCompleted(fightPage)){
+                if(!upcomingEvent.isPicksLocked()){
+                    pickService.lockPicksForEvent(upcomingEvent);
+                    upcomingEvent.setPicksLocked(true);
+                    eventRepository.save(upcomingEvent);
+                }
                 Fight savedFight = updateFightFromFightPage(updatedFight, fightPage);
                 saveRoundsFromFightPage(savedFight, fightPage);
-                //notifs & picks fix
+                pickService.updatePickResults(upcomingEvent);
+                //notifs
             } else{
                 System.out.println("Fight not completed yet: " + updatedFight.getStatsId());
             }
@@ -328,6 +338,7 @@ public class UfcUpdateJobService {
             event.setStatus(Event.Status.SCHEDULED);
             event.setEventDate(date1);
             event.setLocation(events.get(i).select("td:nth-child(2)").text().trim());
+            event.setPicksLocked(false);
 
             eventRepository.save(event);
         }
@@ -336,7 +347,7 @@ public class UfcUpdateJobService {
 
     @Transactional
     public void handleFightChange(Fight fight){
-        List<Pick> fightPicks = picksRepository.findByFightId(fight);
+        List<Pick> fightPicks = picksRepository.findByFight(fight);
         for(Pick pick : fightPicks){
             pick.setStatus(Pick.PickStatus.INVALID);
             pick.setInvalidReason("fight changed");

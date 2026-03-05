@@ -33,6 +33,9 @@ public class Event {
     @Column(name = "status")
     private Status status;
 
+    @Column(name = "is_picks_locked")
+    private boolean isPicksLocked;
+
     @Column(name = "stats_id")
     private String statsId;
 

@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface PicksRepository extends JpaRepository<Pick, Long> {
 
-    List<Pick> findByFightId(Fight fight);
+    List<Pick> findByFight(Fight fight);
 }

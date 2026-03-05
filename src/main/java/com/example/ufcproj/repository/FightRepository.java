@@ -1,5 +1,6 @@
 package com.example.ufcproj.repository;
 
+import com.example.ufcproj.entity.Event;
 import com.example.ufcproj.entity.Fight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,5 +28,9 @@ public interface FightRepository extends JpaRepository <Fight, Long> {
 
     List<Fight> findByEvent_EventIdAndStatus(Long eventId, Fight.Status status);
 
+    List<Fight> findByEvent_EventId(Long eventId);
+
     Fight findByStatsId(String statsId);
+
+    boolean existsByEvent_EventIdAndStatus(Event upComingEvent, Fight.Status status);
 }
