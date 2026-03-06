@@ -28,8 +28,9 @@ public class Pick {
     @JoinColumn(name = "picked_fighter_id")
     private Fighter pickedFighter;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "predicted_method")
-    private String pickedMethod;
+    private PickStatus pickedMethod;
 
     @Column(name = "predicted_round")
     private Integer predictedRound;
@@ -53,6 +54,9 @@ public class Pick {
     @Column(name = "pick_result")
     private PickResult pickResult;
 
+    @Column(name = "points_award")
+    private Integer pointsAward;
+
     public enum PickStatus {
         VALID,
         LOCKED,
@@ -64,5 +68,12 @@ public class Pick {
         WIN,
         LOSS,
         NO_CONTEST
+    }
+
+    public enum Method {
+        KO_TKO,
+        SUBMISSION,
+        DECISION,
+        NC
     }
 }

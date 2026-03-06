@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class PickService {
@@ -39,14 +40,30 @@ public class PickService {
         List<Fight> fights = fightRepository.findByEvent_EventId(event.getEventId());
         for(Fight fight: fights){
             List<Pick> picks = picksRepository.findByFight(fight);
+            int award = 0;
             for(Pick pick: picks){
                 if(fight.getWinnerCorner() == Fight.WinnerCorner.RED && pick.getPickedFighter().equals(fight.getRedFighterId())){
                     pick.setPickResult(Pick.PickResult.WIN);
+                    award += 10;
+                    if(Objects.equals(pick.getPredictedRound(), fight.getEndRound())){
+                        award += 10;
+                    }
+                    if(Objects.equals(pick.getPickedMethod(), fight.getMethod())){
+                        award += 10;
+                    }
                 } else if(fight.getWinnerCorner() == Fight.WinnerCorner.BLUE && pick.getPickedFighter().equals(fight.getBlueFighterId())){
                     pick.setPickResult(Pick.PickResult.WIN);
+                    award += 10;
+                    if(Objects.equals(pick.getPredictedRound(), fight.getEndRound())){
+                        award += 10;
+                    }
+                    if(Objects.equals(pick.getPickedMethod(), fight.getMethod())){
+                        award += 10;
+                    }
                 } else{
                     pick.setPickResult(Pick.PickResult.LOSS);
                 }
+                pick.setPointsAward(award);
                 picksRepository.save(pick);
             }
         }

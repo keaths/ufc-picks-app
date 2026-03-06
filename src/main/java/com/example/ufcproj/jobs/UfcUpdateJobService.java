@@ -147,7 +147,7 @@ public class UfcUpdateJobService {
         } catch (RuntimeException e) {
             methodDetail = "";
         }
-        fight.setMethod(methodDetail);
+        fight.setMethod(getMethod(methodDetail));
 
         String fightWinner = null;
         String possDraw = null;
@@ -396,5 +396,19 @@ public class UfcUpdateJobService {
 
     private boolean isFightCompleted(Document fightPage){
         return !fightPage.select("i.b-fight-details__person-status_style_gray").isEmpty();
+    }
+
+    private Fight.Method getMethod(String method){
+        if(method.contains("Decision")){
+            return Fight.Method.DECISION;
+        }
+        if(method.contains("KO") || method.contains("TKO")){
+            return Fight.Method.KO_TKO;
+        }
+        if(method.contains("Submission")){
+            return Fight.Method.SUBMISSION;
+        } else{
+            return Fight.Method.NC;
+        }
     }
 }

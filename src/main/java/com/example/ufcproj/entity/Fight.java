@@ -33,8 +33,9 @@ public class Fight {
     @Column(name = "winner_corner")
     private WinnerCorner winnerCorner; // RED/BLUE/DRAW/NC
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "method")
-    private String method; // KO/TKO/SUB/DEC etc.
+    private Method method; // KO/TKO/SUB/DEC etc.
 
     @Column(name = "method_detail")
     private String methodDetail; // e.g. "Rear Naked Choke"
@@ -67,6 +68,13 @@ public class Fight {
 
     public enum Status {
         SCHEDULED, CANCELLED, COMPLETED
+    }
+
+    public enum Method {
+        KO_TKO,
+        SUBMISSION,
+        DECISION,
+        NC
     }
 
     @OneToMany(mappedBy = "fight")
