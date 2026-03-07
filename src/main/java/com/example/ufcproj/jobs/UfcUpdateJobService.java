@@ -384,7 +384,7 @@ public class UfcUpdateJobService {
     private Document fetchFightDetailsWithRetry(String fightStatsId) throws InterruptedException {
         while(true){
             try{
-                return Jsoup.connect("http:/ufcstats.com/fight-details/" + fightStatsId).get();
+                return Jsoup.connect("http://ufcstats.com/fight-details/" + fightStatsId).get();
             } catch (HttpStatusException e){
                 System.out.println("Connection failed, retrying...");
                 Thread.sleep(1500);

@@ -17,7 +17,6 @@ import java.io.IOException;
 public class UfcprojApplication {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-
 		SpringApplication.run(UfcprojApplication.class, args);
 	}
 
