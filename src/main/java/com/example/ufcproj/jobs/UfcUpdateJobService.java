@@ -64,17 +64,25 @@ public class UfcUpdateJobService {
 
     @Transactional
     public void runPollToday() throws InterruptedException, IOException {
+        System.out.println("TESTING TESTING TESTING");
         LocalDate today = LocalDate.now(ZoneId.of("America/New_York"));
         Event upcomingEvent = eventRepository.findByStatusAndEventDate(Event.Status.SCHEDULED, today);
         if(upcomingEvent == null){
-            System.out.println("No fights today");
-            return;
+            upcomingEvent = eventRepository.findByStatusAndEventDate(Event.Status.IN_PROGRESS, today);
+            if(upcomingEvent == null){
+                System.out.println("No fights today");
+                return;
+            }
         }
-
+        if(!upcomingEvent.getStatus().equals(Event.Status.IN_PROGRESS)){
+            upcomingEvent.setStatus(Event.Status.IN_PROGRESS);
+            eventRepository.save(upcomingEvent);
+        }
         syncEventCardCurrent(upcomingEvent);
         List<Fight> fights = fightRepository.findByEvent_EventIdAndStatus(upcomingEvent.getEventId(), Fight.Status.SCHEDULED);
         if(fights.isEmpty()){
             upcomingEvent.setStatus(Event.Status.COMPLETED);
+            System.out.println(upcomingEvent.getEventName() + " has completed");
             eventRepository.save(upcomingEvent);
             return;
         }
@@ -217,7 +225,7 @@ public class UfcUpdateJobService {
                 if (!fights.isEmpty()) {
                     for (Fight fight : fights) {
                         fight.setStatus(Fight.Status.CANCELLED);
-                        fightRepository.save(fight);
+                        Fight cancelledFight = fightRepository.save(fight);
                         pickService.updatePickCancellation(fight);
                     }
                 }
