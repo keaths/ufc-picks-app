@@ -15,8 +15,8 @@ import java.util.Objects;
 @Service
 public class PickService {
 
-    private PicksRepository picksRepository;
-    private FightRepository fightRepository;
+    private final PicksRepository picksRepository;
+    private final FightRepository fightRepository;
 
     public PickService(PicksRepository picksRepository, FightRepository fightRepository){
         this.picksRepository = picksRepository;
@@ -30,18 +30,21 @@ public class PickService {
             List<Pick> picks = picksRepository.findByFight(fight);
             for(Pick pick: picks){
                 pick.setStatus(Pick.PickStatus.LOCKED);
-                picksRepository.save(pick);
             }
+            picksRepository.saveAll(picks);
         }
     }
 
     @Transactional
     public void updatePickResults(Event event){
-        List<Fight> fights = fightRepository.findByEvent_EventId(event.getEventId());
+        List<Fight> fights = fightRepository.findByEvent_EventIdAndStatus(event.getEventId(), Fight.Status.COMPLETED);
         for(Fight fight: fights){
             List<Pick> picks = picksRepository.findByFight(fight);
             int award = 0;
             for(Pick pick: picks){
+                if(!pick.getPickResult().equals(Pick.PickResult.PENDING)){
+                    continue;
+                }
                 if(fight.getWinnerCorner() == Fight.WinnerCorner.RED && pick.getPickedFighter().equals(fight.getRedFighterId())){
                     pick.setPickResult(Pick.PickResult.WIN);
                     award += 10;
@@ -67,5 +70,14 @@ public class PickService {
                 picksRepository.save(pick);
             }
         }
+    }
+
+    @Transactional
+    public void updatePickCancellation(Fight fight){
+        List<Pick> picks = picksRepository.findByFight(fight);
+        for(Pick pick: picks){
+            pick.setStatus(Pick.PickStatus.INVALID);
+        }
+        picksRepository.saveAll(picks);
     }
 }

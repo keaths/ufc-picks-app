@@ -30,7 +30,7 @@ public class Pick {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "predicted_method")
-    private PickStatus pickedMethod;
+    private Method pickedMethod;
 
     @Column(name = "predicted_round")
     private Integer predictedRound;
@@ -41,8 +41,8 @@ public class Pick {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @Column(name = "status")
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private PickStatus status;
 
     @Column(name = "invalid_reason")
@@ -51,6 +51,7 @@ public class Pick {
     @Column(name = "invalidated_at")
     private LocalDateTime invalidatedAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "pick_result")
     private PickResult pickResult;
 

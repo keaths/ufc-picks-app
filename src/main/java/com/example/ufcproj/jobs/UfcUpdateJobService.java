@@ -71,7 +71,7 @@ public class UfcUpdateJobService {
             return;
         }
 
-        syncEventCard(upcomingEvent);
+        syncEventCardCurrent(upcomingEvent);
         List<Fight> fights = fightRepository.findByEvent_EventIdAndStatus(upcomingEvent.getEventId(), Fight.Status.SCHEDULED);
         if(fights.isEmpty()){
             upcomingEvent.setStatus(Event.Status.COMPLETED);
@@ -94,6 +94,7 @@ public class UfcUpdateJobService {
                 System.out.println("Fight not completed yet: " + updatedFight.getStatsId());
             }
         }
+        System.out.println("Fights Updated");
     }
 
     @Transactional
@@ -133,6 +134,7 @@ public class UfcUpdateJobService {
                 roundRepository.save(round);
             }
         }
+        System.out.println("Rounds Done");
     }
 
     @Transactional
@@ -167,7 +169,9 @@ public class UfcUpdateJobService {
             fight.setWinnerCorner(Fight.WinnerCorner.NC);
         }
         fight.setStatus(Fight.Status.COMPLETED);
+        System.out.println("Fight added");
         return fightRepository.save(fight);
+
     }
 
     @Transactional
@@ -208,6 +212,71 @@ public class UfcUpdateJobService {
                     } else {
                         updateFightIfChanged(foundFight, redFighter, blueFighter, weightClass, isTitle);
                         fights.removeIf(f -> f.getStatsId().equals(statsId));
+                    }
+                }
+                if (!fights.isEmpty()) {
+                    for (Fight fight : fights) {
+                        fight.setStatus(Fight.Status.CANCELLED);
+                        fightRepository.save(fight);
+                        pickService.updatePickCancellation(fight);
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Connection failed. Retrying...");
+                Thread.sleep(1500);
+            }
+        }
+    }
+
+    public void syncEventCardCurrent(Event upcomingEvent) throws IOException, InterruptedException {
+        boolean eventConnected = false;
+        while (!eventConnected) {
+            try {
+                Document eventPage = Jsoup.connect("http://ufcstats.com/event-details/" + upcomingEvent.getStatsId()).get();
+                eventConnected = true;
+
+                ArrayList<Element> eventFights = eventPage.select("tbody tr");
+                List<Fight> fights = fightRepository.findByEvent_EventIdAndStatus(upcomingEvent.getEventId(), Fight.Status.SCHEDULED);
+                for (Element eventFight : eventFights) {
+                    String statsId = "";
+                    try{
+                        statsId = eventFight.select("td:nth-child(1) a").attr("abs:href").split("/")[4];
+                    } catch (RuntimeException e){
+                        System.out.println("not completed.");
+                    }
+                    try{
+                        statsId = eventFight.select("td:nth-child(5) a").attr("data-link").split("/")[4];
+                    } catch (RuntimeException e){
+                        System.out.println("completed.");
+                    }
+
+                    Fight foundFight = fightRepository.findByStatsId(statsId);
+
+                    String redStat = eventFight.select("td:nth-child(2) p:nth-child(1) a").attr("abs:href").split("/")[4];
+                    String blueStat = eventFight.select("td:nth-child(2) p:nth-child(2) a").attr("abs:href").split("/")[4];
+
+                    String weightClass = eventFight.select("td:nth-child(7) p").text().trim();
+                    boolean isTitle = !eventFight.select("img[src*=belt]").isEmpty();
+
+                    String redFighterFirst = eventFight.select("td:nth-child(2) p:nth-child(1) a").text().trim().split(" ")[0];
+                    String redFighterLast = null;
+                    try {
+                        redFighterLast = eventFight.select("td:nth-child(2) p:nth-child(1) a").text().trim().split(" ")[1];
+                    } catch (RuntimeException ignored) {
+
+                    }
+                    String blueFighterFirst = eventFight.select("td:nth-child(2) p:nth-child(2) a").text().trim().split(" ")[0];
+                    String blueFighterLast = eventFight.select("td:nth-child(2) p:nth-child(2) a").text().trim().split(" ")[1];
+
+                    Fighter redFighter = getOrCreateFighter(redStat, redFighterFirst, redFighterLast, weightClass);
+                    Fighter blueFighter = getOrCreateFighter(blueStat, blueFighterFirst, blueFighterLast, weightClass);
+
+                    if (foundFight == null) {
+                        createFight(upcomingEvent, statsId, weightClass, isTitle, redFighter, blueFighter);
+                    } else {
+                        updateFightIfChanged(foundFight, redFighter, blueFighter, weightClass, isTitle);
+                        String finalStatsId = statsId;
+                        fights.removeIf(f -> f.getStatsId().equals(finalStatsId));
                     }
                 }
                 if (!fights.isEmpty()) {
