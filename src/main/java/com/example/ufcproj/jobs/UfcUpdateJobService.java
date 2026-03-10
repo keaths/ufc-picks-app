@@ -2,6 +2,7 @@ package com.example.ufcproj.jobs;
 
 import com.example.ufcproj.entity.*;
 import com.example.ufcproj.repository.*;
+import com.example.ufcproj.service.NotificationService;
 import com.example.ufcproj.service.PickService;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -28,8 +29,8 @@ public class UfcUpdateJobService {
     private final FightRepository fightRepository;
     private final UserRepository userRepository;
     private final PicksRepository picksRepository;
-    private final NotificationsRepository notificationsRepository;
     private final PickService pickService;
+    private final NotificationService notificationService;
 
     public UfcUpdateJobService(
             FighterRepository fighterRepository,
@@ -39,7 +40,8 @@ public class UfcUpdateJobService {
             UserRepository userRepository,
             PicksRepository picksRepository,
             NotificationsRepository notificationsRepository,
-            PickService pickService
+            PickService pickService,
+            NotificationService notificationService
     ) {
         this.fighterRepository = fighterRepository;
         this.eventRepository = eventRepository;
@@ -47,7 +49,7 @@ public class UfcUpdateJobService {
         this.fightRepository = fightRepository;
         this.userRepository = userRepository;
         this.picksRepository = picksRepository;
-        this.notificationsRepository = notificationsRepository;
+        this.notificationService = notificationService;
         this.pickService = pickService;
     }
 
@@ -77,6 +79,7 @@ public class UfcUpdateJobService {
         if(!upcomingEvent.getStatus().equals(Event.Status.IN_PROGRESS)){
             upcomingEvent.setStatus(Event.Status.IN_PROGRESS);
             eventRepository.save(upcomingEvent);
+            notificationService.createEventNotification(Notifications.Type.EVENT_STARTED, upcomingEvent);
         }
         syncEventCardCurrent(upcomingEvent);
         List<Fight> fights = fightRepository.findByEvent_EventIdAndStatus(upcomingEvent.getEventId(), Fight.Status.SCHEDULED);
@@ -84,6 +87,7 @@ public class UfcUpdateJobService {
             upcomingEvent.setStatus(Event.Status.COMPLETED);
             System.out.println(upcomingEvent.getEventName() + " has completed");
             eventRepository.save(upcomingEvent);
+            notificationService.createEventNotification(Notifications.Type.EVENT_COMPLETED, upcomingEvent);
             return;
         }
         for (Fight updatedFight : fights) {
@@ -93,11 +97,12 @@ public class UfcUpdateJobService {
                     pickService.lockPicksForEvent(upcomingEvent);
                     upcomingEvent.setPicksLocked(true);
                     eventRepository.save(upcomingEvent);
+                    notificationService.createPicksEventNotification(Notifications.Type.PICKS_LOCKED, upcomingEvent);
                 }
                 Fight savedFight = updateFightFromFightPage(updatedFight, fightPage);
                 saveRoundsFromFightPage(savedFight, fightPage);
                 pickService.updatePickResults(upcomingEvent);
-                //notifs
+                notificationService.createFightResultNotification(Notifications.Type.FIGHT_RESULT, upcomingEvent, savedFight);
             } else{
                 System.out.println("Fight not completed yet: " + updatedFight.getStatsId());
             }
@@ -179,7 +184,6 @@ public class UfcUpdateJobService {
         fight.setStatus(Fight.Status.COMPLETED);
         System.out.println("Fight added");
         return fightRepository.save(fight);
-
     }
 
     @Transactional
@@ -225,6 +229,7 @@ public class UfcUpdateJobService {
                 if (!fights.isEmpty()) {
                     for (Fight fight : fights) {
                         fight.setStatus(Fight.Status.CANCELLED);
+                        notificationService.createFightNotification(Notifications.Type.FIGHT_CANCELLED, fight.getEvent(), fight);
                         Fight cancelledFight = fightRepository.save(fight);
                         pickService.updatePickCancellation(fight);
                     }
@@ -290,7 +295,9 @@ public class UfcUpdateJobService {
                 if (!fights.isEmpty()) {
                     for (Fight fight : fights) {
                         fight.setStatus(Fight.Status.CANCELLED);
+                        notificationService.createFightNotification(Notifications.Type.FIGHT_CANCELLED, fight.getEvent(), fight);
                         Fight cancelledFight = fightRepository.save(fight);
+                        pickService.updatePickCancellation(fight);
                     }
                 }
             } catch (IOException e) {
@@ -311,7 +318,8 @@ public class UfcUpdateJobService {
         fight.setIsTitleBout(isTitle);
         fight.setStatus(Fight.Status.SCHEDULED);
 
-        fightRepository.save(fight);
+        Fight savedFight = fightRepository.save(fight);
+        notificationService.createFightNotification(Notifications.Type.FIGHT_ADDED, event, savedFight);
     }
 
     private void updateFightIfChanged(Fight fight, Fighter redFighter, Fighter blueFighter, String weightClass, boolean isTitle){
@@ -337,6 +345,9 @@ public class UfcUpdateJobService {
             fightChanged = true;
         }
 
+        if(fightChanged){
+            notificationService.createFightChangeNotification(Notifications.Type.FIGHT_CHANGED, fight.getEvent(), fight);
+        }
         Fight savedFight = fightRepository.save(fight);
     }
 
@@ -416,29 +427,10 @@ public class UfcUpdateJobService {
             event.setEventDate(date1);
             event.setLocation(events.get(i).select("td:nth-child(2)").text().trim());
             event.setPicksLocked(false);
-
-            eventRepository.save(event);
+            Event savedEvent = eventRepository.save(event);
+            notificationService.createEventNotification(Notifications.Type.EVENT_ADDED, savedEvent);
         }
         System.out.println("Events done");
-    }
-
-    @Transactional
-    public void handleFightChange(Fight fight){
-        List<Pick> fightPicks = picksRepository.findByFight(fight);
-        for(Pick pick : fightPicks){
-            pick.setStatus(Pick.PickStatus.INVALID);
-            pick.setInvalidReason("fight changed");
-            pick.setInvalidatedAt(LocalDateTime.now());
-
-            Notifications notification = new Notifications();
-            notification.setUser(pick.getUser());
-            notification.setType(Notifications.Type.FIGHT_CHANGED);
-            notification.setCreatedAt(LocalDateTime.now());
-            notification.setRead(false);
-
-            notificationsRepository.save(notification);
-        }
-        picksRepository.saveAll(fightPicks);
     }
 
     public int parseTime(String time){

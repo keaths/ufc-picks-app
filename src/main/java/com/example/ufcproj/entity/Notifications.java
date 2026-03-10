@@ -15,12 +15,21 @@ public class Notifications {
     @Column(name = "notification_id")
     private Long notificationId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "notification_type")
+    private Type notificationType;
+
+    @ManyToOne
+    @JoinColumn(name = "event_id")
+    private Event event;
+
+    @ManyToOne
+    @JoinColumn(name = "fight_id")
+    private Fight fight;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Column(name = "type")
-    private Type type;
 
     @Column(name = "message")
     private String message;
@@ -28,26 +37,18 @@ public class Notifications {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "isRead")
+    @Column(name = "is_read")
     private boolean isRead;
 
     public enum Type{
-        FIGHT_CHANGED,
-
-        FIGHT_CANCELLED,
-
-        PICK_INVALIDATED,
-
         EVENT_STARTED,
-
+        PICKS_LOCKED,
+        FIGHT_RESULT,
+        FIGHT_CANCELLED,
+        FIGHT_ADDED,
+        WEIGHTCLASS_CHANGED,
         EVENT_COMPLETED,
-
-        PICK_RESULT_WIN,
-
-        PICK_RESULT_LOSS,
-
-        PICK_RESULT_DRAW,
-
-        FIGHT_ADDED
+        EVENT_ADDED,
+        FIGHT_CHANGED,
     }
 }

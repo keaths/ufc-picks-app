@@ -1,7 +1,9 @@
 package com.example.ufcproj.repository;
 
+import com.example.ufcproj.entity.Event;
 import com.example.ufcproj.entity.Fight;
 import com.example.ufcproj.entity.Pick;
+import com.example.ufcproj.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +18,7 @@ public interface PicksRepository extends JpaRepository<Pick, Long> {
     List<Pick> findByFight(Fight fight);
 
     Pick findByPickId(Long pickId);
+
+    List<Pick> findByFightEvent(Event event);
 
 }
