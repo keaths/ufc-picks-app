@@ -1,7 +1,10 @@
 package com.example.ufcproj.entity;
 
 import jakarta.persistence.*;
+import jdk.jshell.Snippet;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,15 +38,17 @@ public class Pick {
     @Column(name = "predicted_round")
     private Integer predictedRound;
 
+    @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private PickStatus status;
+    private PickStatus status = PickStatus.VALID;
 
     @Column(name = "invalid_reason")
     private String invalidReason;
@@ -53,10 +58,10 @@ public class Pick {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "pick_result")
-    private PickResult pickResult;
+    private PickResult pickResult = PickResult.PENDING;
 
     @Column(name = "points_award")
-    private Integer pointsAward;
+    private Integer pointsAward = 0;
 
     public enum PickStatus {
         VALID,

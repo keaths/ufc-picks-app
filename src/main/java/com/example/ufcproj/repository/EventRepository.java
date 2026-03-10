@@ -21,4 +21,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Event findByStatusAndEventDate(Event.Status status, LocalDate date);
 
+    Event findByEventId(Long eventId);
 }

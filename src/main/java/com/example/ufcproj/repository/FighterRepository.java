@@ -22,4 +22,6 @@ public interface FighterRepository extends JpaRepository<Fighter, Long> {
     Fighter findByFirstNameAndLastName(@Param("fullName") String fullName);
 
     Fighter findByUfcStatId(String id);
+
+    Fighter findByFighterId(Long fighterId);
 }

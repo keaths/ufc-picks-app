@@ -3,9 +3,9 @@ package com.example.ufcproj.service;
 import com.example.ufcproj.entity.Event;
 import com.example.ufcproj.entity.Fight;
 import com.example.ufcproj.entity.Pick;
-import com.example.ufcproj.repository.EventRepository;
-import com.example.ufcproj.repository.FightRepository;
-import com.example.ufcproj.repository.PicksRepository;
+import com.example.ufcproj.repository.*;
+import com.example.ufcproj.requests.CreatePickRequest;
+import com.example.ufcproj.requests.UpdatePickRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +17,16 @@ public class PickService {
 
     private final PicksRepository picksRepository;
     private final FightRepository fightRepository;
+    private final FighterRepository fighterRepository;
+    private final UserRepository userRepository;
 
-    public PickService(PicksRepository picksRepository, FightRepository fightRepository){
+    public PickService(PicksRepository picksRepository, FightRepository fightRepository, FighterRepository fighterRepository, UserRepository userRepository){
         this.picksRepository = picksRepository;
         this.fightRepository = fightRepository;
+        this.fighterRepository = fighterRepository;
+        this.userRepository = userRepository;
     }
 
-    @Transactional
     public void lockPicksForEvent(Event event){
         List<Fight> fights = fightRepository.findByEvent_EventId(event.getEventId());
         for(Fight fight : fights){
@@ -35,7 +38,6 @@ public class PickService {
         }
     }
 
-    @Transactional
     public void updatePickResults(Event event){
         List<Fight> fights = fightRepository.findByEvent_EventIdAndStatus(event.getEventId(), Fight.Status.COMPLETED);
         for(Fight fight: fights){
@@ -72,12 +74,58 @@ public class PickService {
         }
     }
 
-    @Transactional
     public void updatePickCancellation(Fight fight){
         List<Pick> picks = picksRepository.findByFight(fight);
         for(Pick pick: picks){
             pick.setStatus(Pick.PickStatus.INVALID);
         }
         picksRepository.saveAll(picks);
+    }
+
+    public void createPick(CreatePickRequest pickRequest){
+        Fight fight = fightRepository.findByFightId(pickRequest.fightId());
+
+        Pick pick = new Pick();
+        pick.setUser(userRepository.findByUserId(pickRequest.userId()));
+        pick.setFight(fight);
+        pick.setPickedFighter(fighterRepository.findByFighterId(pickRequest.pickedFighterId()));
+        switch(pickRequest.method()){
+            case "KO":
+                pick.setPickedMethod(Pick.Method.KO_TKO);
+                break;
+
+            case "DECISION":
+                pick.setPickedMethod(Pick.Method.DECISION);
+                break;
+
+            case "SUBMISSION":
+                pick.setPickedMethod(Pick.Method.SUBMISSION);
+                break;
+        }
+        pick.setPredictedRound(pickRequest.endRound());
+
+        picksRepository.save(pick);
+    }
+
+    public void updatePick(UpdatePickRequest request, Long pickId){
+        Pick pick = picksRepository.findByPickId(pickId);
+        if(pick.getStatus().toString().equals("VALID")){
+            pick.setPickedFighter(pick.getPickedFighter());
+            switch(request.method()){
+                case "KO":
+                    pick.setPickedMethod(Pick.Method.KO_TKO);
+                    break;
+
+                case "DECISION":
+                    pick.setPickedMethod(Pick.Method.DECISION);
+                    break;
+
+                case "SUBMISSION":
+                    pick.setPickedMethod(Pick.Method.SUBMISSION);
+                    break;
+            }
+            pick.setPredictedRound(request.endRound());
+            picksRepository.save(pick);
+        }
     }
 }

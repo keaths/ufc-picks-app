@@ -22,7 +22,7 @@ public interface FightRepository extends JpaRepository <Fight, Long> {
             @Param("fighterId") Long fighterId
     );
 
-    @Query(value = "SELECT * FROM fights" +
+    @Query(value = "SELECT * FROM fights " +
             "where fight_id = :fightId", nativeQuery = true)
     Fight findByFightId(@Param("fightId") Long fightId);
 

@@ -15,4 +15,6 @@ public interface PicksRepository extends JpaRepository<Pick, Long> {
 
     List<Pick> findByFight(Fight fight);
 
+    Pick findByPickId(Long pickId);
+
 }

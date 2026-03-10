@@ -1,5 +1,6 @@
 package com.example.ufcproj.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -16,6 +17,7 @@ public class Fight {
     @Column(name = "fight_id")
     private Long fightId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     @ToString.Exclude
@@ -77,6 +79,7 @@ public class Fight {
         NC
     }
 
+    @JsonIgnore
     @OneToMany(mappedBy = "fight")
     private List<Pick> picks;
 }
