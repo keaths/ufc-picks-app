@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { savePick } from "../../../api/savePick";
 import MethodSelector from "./MethodSelector";
 import RoundSelector from "./RoundSelector";
 import SavePicksButton from "./SavePickButton";
@@ -12,12 +13,34 @@ type Props = {
     setSelectedMethod: React.Dispatch<React.SetStateAction<Method | null>>;
     selectedRound: number | null,
     setSelectedRound: React.Dispatch<React.SetStateAction<number | null>>;
+    fightId: number,
+    setFighterId: React.Dispatch<React.SetStateAction<number | null>>;
+    fighterId: number,
+    endRound: number | null,
 }
 
-export default function PickDetails({ selectedMethod, setSelectedMethod, selectedRound, setSelectedRound }: Props) {
+export default function PickDetails({ selectedMethod, setSelectedMethod, selectedRound, setSelectedRound, fightId, fighterId, setFighterId, endRound}: Props) {
 
-    function handleMethodChange(){
+    async function handleSavePick(){
+        console.log("starting");
+        const payload = {
+            userId: 1,
+            fightId: fightId,
+            pickedFighterId: fighterId,
+            method: selectedMethod,
+            endRound: endRound
+        }
 
+        console.log(payload);
+        try{
+            await savePick(payload); 
+        } catch (error){
+            console.log("Failed, ", error);
+        }
+        console.log("done I think");
+        setFighterId(null);
+        setSelectedMethod(null);
+        setSelectedRound(null);
     }
 
     return (
@@ -36,7 +59,7 @@ export default function PickDetails({ selectedMethod, setSelectedMethod, selecte
                     entering={FadeIn.duration(300).delay(50)}
                     exiting={FadeOut.duration(10).delay(50)}
                 >
-                    <SavePicksButton />
+                    <SavePicksButton onPress={() => handleSavePick()}/>
                 </Animated.View>
             }
         </View>

@@ -8,7 +8,7 @@ type Props = {
     selected?: boolean
 }
 
-export default function OptionButton({label, onPress, selected = false}: Props) {
+export default function OptionButton({ label, onPress, selected = false }: Props) {
 
     const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
 
@@ -17,8 +17,8 @@ export default function OptionButton({label, onPress, selected = false}: Props) 
             onPressIn={onPressIn}
             onPressOut={onPressOut}>
             <Animated.View style={[styles.methodButton,
-                                selected && styles.methodButtonSelected,
-                                animatedStyle]}>
+            selected && styles.methodButtonSelected,
+                animatedStyle]}>
                 <Text style={styles.buttonText}>{label}</Text>
             </Animated.View>
         </Pressable>

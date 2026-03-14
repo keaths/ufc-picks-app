@@ -58,8 +58,12 @@ export default function EventFight({ fight }: Props) {
                 <Text style={styles.subTitle}></Text>
             </View> */}
                 <View style={styles.fighterRow}>
-                    <EventFighterProfile fighter={fight.redFighter} isRedFighter={true} onPress={() => handleSelect(fight.redFighter.fighterId)} />
-                    <EventFighterProfile fighter={fight.blueFighter} isRedFighter={false} onPress={() => handleSelect(fight.blueFighter.fighterId)} />
+                    <EventFighterProfile fighter={fight.redFighter} isRedFighter={true} onPress={() => handleSelect(fight.redFighter.fighterId)}
+                     isSelected={selectedFighterId === fight.redFighter.fighterId}
+                     isOtherSelected={selectedFighterId !== null && selectedFighterId !== fight.redFighter.fighterId}/>
+                    <EventFighterProfile fighter={fight.blueFighter} isRedFighter={false} onPress={() => handleSelect(fight.blueFighter.fighterId)}
+                     isSelected={selectedFighterId === fight.blueFighter.fighterId}
+                     isOtherSelected={selectedFighterId !== null && selectedFighterId !== fight.blueFighter.fighterId} />
                     <View style={styles.versusBadge}>
                         <Text style={styles.versusText}>VS</Text>
                     </View>
@@ -69,7 +73,10 @@ export default function EventFight({ fight }: Props) {
                         entering={FadeIn.duration(300).delay(50)}
                     // exiting={FadeOutUp.duration(140)}
                     >
-                        <PickDetails selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod} selectedRound={selectedRound} setSelectedRound={setSelectedRound}/>
+                        <PickDetails selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod}
+                         selectedRound={selectedRound} setSelectedRound={setSelectedRound}
+                          fightId={fight.fightId} fighterId={selectedFighterId} setFighterId={setSelectedFighterId} endRound={selectedRound}
+                          />
                     </Animated.View>
                 }
 

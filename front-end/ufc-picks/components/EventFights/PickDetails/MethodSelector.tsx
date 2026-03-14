@@ -12,14 +12,18 @@ type Props = {
     setSelectedRound: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-export default function MethodSelector({ selectedMethod, setSelectedMethod, setSelectedRound }: Props) {
+export default function MethodSelector({ selectedMethod, setSelectedMethod, setSelectedRound, selectedRound }: Props) {
 
     function handleMethodSelect(method: Method) {
-        if(setSelectedRound !== null && method === "DECISION"){
+        if(selectedRound !== null && method === "DECISION"){
+            console.log("here");
             setSelectedMethod(method);
             setSelectedRound(null);
+        } else{
+            setSelectedMethod(method);
+            console.log(selectedMethod);
         }
-        setSelectedMethod(method);
+        
     }
 
     const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();

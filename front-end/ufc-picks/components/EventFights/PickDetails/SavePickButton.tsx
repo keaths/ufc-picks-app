@@ -1,11 +1,25 @@
+import { usePressAnimation } from "@/hooks/usePressAnimation";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
+type Props = {
+    onPress: () => void;
+}
 
-export default function SavePicksButton({ }) {
+export default function SavePicksButton({ onPress }: Props) {
+
+    const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
+
     return (
         <View style={styles.saveContainer}>
-            <Pressable style={styles.saveButton}>
-                <Text style={styles.buttonText}>Save Pick</Text>
+            <Pressable
+                onPress={() => onPress()}
+                onPressIn={onPressIn}
+                onPressOut={onPressOut}
+                style={{width: "100%"}} >
+                <Animated.View style={[styles.saveButton, animatedStyle]}>
+                    <Text style={styles.buttonText}>Save Pick</Text>
+                </Animated.View>
             </Pressable>
         </View>
     )
@@ -29,8 +43,7 @@ const styles = StyleSheet.create({
     },
 
     saveButton: {
-        borderWidth: 1,
-        borderColor: "yellow",
+        backgroundColor: "rgba(196, 164, 37, 0.36)",
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
