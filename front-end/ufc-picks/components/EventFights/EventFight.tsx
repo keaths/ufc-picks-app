@@ -1,36 +1,94 @@
+import { ExistingPick } from "@/api/getPicks";
 import { FightCard } from "@/types/FightCard";
+import { FighterSummary } from "@/types/FighterSummary";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import EventFighterProfile from "./EventFighterProfile";
 import PickDetails from "./PickDetails/PickDetails";
+import SavedPick from "./PickDetails/SavedPick";
 
 type Props = {
-    fight: FightCard
+    fight: FightCard;
+    pick?: ExistingPick;
 };
 
 type Method = "DECISION" | "KO_TKO" | "SUBMISSION" | null;
 
-export default function EventFight({ fight }: Props) {
+export default function EventFight({ fight, pick }: Props) {
 
     const [selectedFighterId, setSelectedFighterId] = useState<number | null>(null);
+    const [selectedFighter, setSelectedFighter] = useState<FighterSummary | null>(null);
     const [selectedMethod, setSelectedMethod] = useState<Method | null>(null);
     const [selectedRound, setSelectedRound] = useState<number | null>(null);
+    const [isPicked, setIsPicked] = useState<boolean | null>(null);
+    const [isEditing, setIsEditing] = useState<boolean | null>(null);
+    const [isExpanded, setIsExpanded] = useState<boolean | null>(false);
+    const [isDisabled, setIsDisabled] = useState<boolean | null>(false);
 
-    function handleSelect(fighterId: number) {
-        if (fighterId === selectedFighterId) {
+    function handleSelect(fighterId: number, fighter: FighterSummary) {
+        if (fighterId !== selectedFighterId && isEditing) {
+            setSelectedFighterId(fighterId);
+            setSelectedFighter(fighter);
+            setSelectedMethod(null);
+            setSelectedRound(null); 
+        } else if((fighterId === selectedFighterId && fighterId === pick?.pickedFighterId) && isEditing){
+            setSelectedFighterId(fighterId);
+            setSelectedFighter(selectedFighter);
+            setSelectedMethod(pick.pickedMethod);
+            setSelectedRound(pick.pickedRound);
+            setIsPicked(true);
+            setIsExpanded(false);
+            setIsDisabled(true);
+        } else if(pick && (fighterId === selectedFighterId && fighterId !== pick?.pickedFighterId) && isEditing){
+            setSelectedFighterId(pick.pickedFighterId);
+            setSelectedFighter(pick.pickedFighter);
+            setSelectedMethod(pick.pickedMethod);
+            setSelectedRound(pick.pickedRound);
+            setIsPicked(true);
+            setIsExpanded(false);
+            setIsDisabled(true);
+        } else if (fighterId === selectedFighterId && !isEditing) {
+            setIsExpanded(false);
             setSelectedFighterId(null);
             setSelectedMethod(null);
             setSelectedRound(null);
-        } else if(selectedFighterId === null){
+        } else if (fighterId === selectedFighterId && isEditing) {
+            setIsExpanded(false);
+            setIsPicked(true);
+            setIsDisabled(true);
+        } else if (selectedFighterId === null) {
+            setIsExpanded(true);
             setSelectedFighterId(fighterId);
-        } else if(fighterId !== selectedFighterId){
+            setSelectedFighter(fighter);
+        } else if (fighterId !== selectedFighterId) {
+            setIsExpanded(true);
             setSelectedFighterId(fighterId);
+            setSelectedFighter(fighter);
             setSelectedMethod(null);
             setSelectedRound(null);
         } 
     }
+
+    function handleEdit(){
+        setIsPicked(false);
+        setIsExpanded(true);
+        setIsDisabled(false);
+        setIsEditing(true);
+    }
+
+    useEffect(() => {
+        if(!pick){
+            return;
+        }
+        setSelectedFighterId(pick.pickedFighterId);
+        setSelectedFighter(pick.pickedFighter);
+        setSelectedMethod(pick.pickedMethod);
+        setSelectedRound(pick.pickedRound);
+        setIsPicked(true);
+        setIsDisabled(true);
+    }, [pick])
 
     return (
         <Animated.View
@@ -50,50 +108,43 @@ export default function EventFight({ fight }: Props) {
                     <View style={styles.eventTitleContainer}>
                         <Text style={styles.header}>{fight.weightClass.toUpperCase()} {fight.isTitleFight ? "TITLE" : ""} BOUT</Text>
                     </View>
-                    {/* <View style={styles.eventDate}>
-                    <Text style={styles.subTitle}>testt</Text>
-                </View> */}
                 </View>
-                {/* <View style={styles.eventLocation}>
-                <Text style={styles.subTitle}></Text>
-            </View> */}
                 <View style={styles.fighterRow}>
-                    <EventFighterProfile fighter={fight.redFighter} isRedFighter={true} onPress={() => handleSelect(fight.redFighter.fighterId)}
-                     isSelected={selectedFighterId === fight.redFighter.fighterId}
-                     isOtherSelected={selectedFighterId !== null && selectedFighterId !== fight.redFighter.fighterId}/>
-                    <EventFighterProfile fighter={fight.blueFighter} isRedFighter={false} onPress={() => handleSelect(fight.blueFighter.fighterId)}
-                     isSelected={selectedFighterId === fight.blueFighter.fighterId}
-                     isOtherSelected={selectedFighterId !== null && selectedFighterId !== fight.blueFighter.fighterId} />
+                    <EventFighterProfile fighter={fight.redFighter} isRedFighter={true} onPress={() => handleSelect(fight.redFighter.fighterId, fight.redFighter)}
+                        isSelected={selectedFighterId === fight.redFighter.fighterId}
+                        isOtherSelected={selectedFighterId !== null && selectedFighterId !== fight.redFighter.fighterId} isDisabled={isDisabled}/>
+                    <EventFighterProfile fighter={fight.blueFighter} isRedFighter={false} onPress={() => handleSelect(fight.blueFighter.fighterId, fight.blueFighter)}
+                        isSelected={selectedFighterId === fight.blueFighter.fighterId}
+                        isOtherSelected={selectedFighterId !== null && selectedFighterId !== fight.blueFighter.fighterId} isDisabled={isDisabled}/>
                     <View style={styles.versusBadge}>
                         <Text style={styles.versusText}>VS</Text>
                     </View>
                 </View>
-                {selectedFighterId !== null &&
+                {isExpanded !== false &&
                     <Animated.View
                         entering={FadeIn.duration(300).delay(50)}
                     // exiting={FadeOutUp.duration(140)}
                     >
                         <PickDetails selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod}
-                         selectedRound={selectedRound} setSelectedRound={setSelectedRound}
-                          fightId={fight.fightId} fighterId={selectedFighterId} setFighterId={setSelectedFighterId} endRound={selectedRound}
-                          />
+                            selectedRound={selectedRound} setSelectedRound={setSelectedRound}
+                            fightId={fight.fightId} fighterId={selectedFighterId} setFighterId={setSelectedFighterId} endRound={selectedRound}
+                            isPicked={isPicked} setIsPicked={setIsPicked} setIsExpanded={setIsExpanded} setIsDisabled={setIsDisabled} setIsEditing={setIsEditing}
+                        />
                     </Animated.View>
                 }
-
-                {/* <View style={styles.predictionsContainer}>
-                <View style={styles.predictions}>
-                    <Text style={styles.subTitle}>test</Text>
-                </View>
-            </View> */}
+                {isPicked &&
+                    <SavedPick selectedMethod={selectedMethod} selectedRound={selectedRound}
+                     fighter={selectedFighter} isPicked={isPicked}
+                      setIsPicked={setIsPicked} onPress={handleEdit} 
+                      setIsDisabled={setIsDisabled} />
+                }
             </LinearGradient>
         </Animated.View>
     )
 }
 
 const styles = StyleSheet.create({
-    
 
-    
     eventCard: {
         width: "90%",
         borderRadius: 18,
@@ -154,19 +205,6 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: 700,
         fontSize: 15,
-    },
-
-    predictionsContainer: {
-        padding: 8,
-        alignItems: "flex-start"
-    },
-
-    predictions: {
-        padding: 5,
-        width: "100%",
-        borderRadius: 10,
-        backgroundColor: "rgba(0, 0, 0, 0.35)",
-        alignItems: "flex-start",
     },
 
     subTitle: {

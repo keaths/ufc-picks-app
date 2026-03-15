@@ -11,9 +11,10 @@ type Props = {
     onPress: () => void;
     isSelected: boolean;
     isOtherSelected: boolean;
+    isDisabled: boolean | null;
 }
 
-export default function EventFighterProfile({ fighter, isRedFighter, onPress, isSelected = false, isOtherSelected = false }: Props) {
+export default function EventFighterProfile({ fighter, isRedFighter, onPress, isSelected = false, isOtherSelected = false, isDisabled}: Props) {
 
     const scale = useSharedValue(1);
     const overlayOpacity = useSharedValue(0);
@@ -44,7 +45,9 @@ export default function EventFighterProfile({ fighter, isRedFighter, onPress, is
         <View style={styles.fighterProfile}>
             {isRedFighter ?
                 <Pressable style={styles.pressable}
-                    onPress={onPress}>
+                    onPress={onPress}
+                    disabled={isDisabled}
+                    >
                     <Animated.View style={[animatedCardStyle]}>
                         <LinearGradient
                             colors={["#8b0000a5", "#ff000000"]}
@@ -61,6 +64,7 @@ export default function EventFighterProfile({ fighter, isRedFighter, onPress, is
 
                 <Pressable
                     onPress={onPress}
+                    disabled={isDisabled}
                     style={styles.pressable}>
                     <Animated.View style={[animatedCardStyle]}>
                         <LinearGradient

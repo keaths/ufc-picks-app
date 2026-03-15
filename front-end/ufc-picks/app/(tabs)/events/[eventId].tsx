@@ -1,4 +1,5 @@
 import { getEventDetails } from "@/api/eventDetails";
+import { ExistingPick, getPicks } from "@/api/getPicks";
 import EventFight from "@/components/EventFights/EventFight";
 import { EventDetails } from "@/types/EventDetails";
 import { useLocalSearchParams } from "expo-router";
@@ -9,14 +10,18 @@ export default function EventDetailsScreen() {
 
     const { eventId } = useLocalSearchParams();
     const [ event, setEvent] = useState<EventDetails | null>(null);
-    
+    const [ picks, setPicks] = useState<ExistingPick[]>([]);
 
     useEffect(() => {
         async function loadEvent() {
-            const data = await getEventDetails(Number(eventId));
-            setEvent(data);
+            const fetchEvent = await getEventDetails(Number(eventId));
+            setEvent(fetchEvent);
+
+            const fetchPicks = await getPicks(1, Number(eventId));
+            setPicks(fetchPicks);
         }
         loadEvent();
+
     }, [eventId]);
 
     const singleFight = event?.fights?.[0];
@@ -24,7 +29,7 @@ export default function EventDetailsScreen() {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             {event?.fights.map(fight => (
-                <EventFight fight={fight} key={fight.fightId}/>
+                <EventFight fight={fight} key={fight.fightId} pick={picks.find(p => p.fightId === fight.fightId)}/>
             ))}
             {/* {singleFight && <EventFight fight={singleFight}/>} */}
         </ScrollView>

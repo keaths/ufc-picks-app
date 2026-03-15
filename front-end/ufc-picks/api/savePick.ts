@@ -1,7 +1,7 @@
 export type CreatePickRequest = {
-    userId: number;
-    fightId: number;
-    pickedFighterId: number;
+    userId: number | null;
+    fightId: number | null;
+    pickedFighterId: number | null;
     method: "DECISION" | "KO_TKO" | "SUBMISSION" | null
     endRound: number | null;
 }

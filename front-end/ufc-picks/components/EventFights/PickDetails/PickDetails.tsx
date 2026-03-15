@@ -1,7 +1,7 @@
-import React from "react";
+import { savePick } from "@/api/savePick";
+import React, { SetStateAction } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { savePick } from "../../../api/savePick";
 import MethodSelector from "./MethodSelector";
 import RoundSelector from "./RoundSelector";
 import SavePicksButton from "./SavePickButton";
@@ -15,11 +15,16 @@ type Props = {
     setSelectedRound: React.Dispatch<React.SetStateAction<number | null>>;
     fightId: number,
     setFighterId: React.Dispatch<React.SetStateAction<number | null>>;
-    fighterId: number,
+    fighterId: number | null,
     endRound: number | null,
+    isPicked: boolean | null,
+    setIsPicked: React.Dispatch<SetStateAction<boolean | null>>;
+    setIsExpanded: React.Dispatch<SetStateAction<boolean | null>>;
+    setIsDisabled: React.Dispatch<SetStateAction<boolean | null>>;
+    setIsEditing: React.Dispatch<SetStateAction<boolean | null>>;
 }
 
-export default function PickDetails({ selectedMethod, setSelectedMethod, selectedRound, setSelectedRound, fightId, fighterId, setFighterId, endRound}: Props) {
+export default function PickDetails({ selectedMethod, setSelectedMethod, selectedRound, setSelectedRound, fightId, fighterId, endRound, setIsPicked, setIsExpanded, setIsDisabled, setIsEditing}: Props) {
 
     async function handleSavePick(){
         console.log("starting");
@@ -38,9 +43,11 @@ export default function PickDetails({ selectedMethod, setSelectedMethod, selecte
             console.log("Failed, ", error);
         }
         console.log("done I think");
-        setFighterId(null);
-        setSelectedMethod(null);
-        setSelectedRound(null);
+        // setFighterId(null);
+        setIsPicked(true);
+        setIsExpanded(false);
+        setIsDisabled(true);
+        setIsEditing(false);
     }
 
     return (

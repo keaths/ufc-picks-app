@@ -35,15 +35,19 @@ const styles = StyleSheet.create({
     saveContainer: {
         // borderWidth: 1,
         borderColor: "white",
-        height: 55,
-        paddingTop: 5,
-        paddingBottom: 5,
+        paddingStart: 6,
+        paddingEnd: 8,
+        height: 65,
+        paddingTop: 10,
+        paddingBottom: 10,
         justifyContent: "center",
         alignItems: "center"
     },
 
     saveButton: {
         backgroundColor: "rgba(196, 164, 37, 0.36)",
+        borderWidth: 1,
+        borderColor: "rgb(196, 164, 37)",
         width: "100%",
         justifyContent: "center",
         alignItems: "center",

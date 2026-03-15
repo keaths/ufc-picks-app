@@ -2,6 +2,7 @@ import { usePressAnimation } from "@/hooks/usePressAnimation";
 import { Pressable, StyleSheet, Text } from "react-native";
 import Animated from "react-native-reanimated";
 
+
 type Props = {
     label: string,
     onPress: () => void;
@@ -38,43 +39,8 @@ const styles = StyleSheet.create({
         height: 10
     },
 
-    divider: {
-        width: "100%",
-        borderTopWidth: 2,
-        borderColor: "rgba(0, 0, 0, 0.17)",
-        height: 10
-    },
-
-    methodRowContainer: {
-        flexDirection: "row",
-        // borderWidth: 1,
-        borderColor: "white"
-    },
-
-    test: {
-        paddingStart: 8,
-        color: "white",
-        fontWeight: "700"
-    },
-
-    methodRow: {
-        width: "33.333%",
-        height: 45,
-        // borderWidth: 1,
-        borderColor: "white",
-        padding: 5
-    },
-
-    roundRow: {
-        width: "20%",
-        height: 45,
-        // borderWidth: 1,
-        borderColor: "white",
-        padding: 5
-    },
-
     methodButton: {
-        height: "100%",
+        height: 35,
         borderRadius: 8,
         justifyContent: "center",
         alignItems: "center",
@@ -86,7 +52,9 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(196, 164, 37, 0.36)"
+        backgroundColor: "rgba(196, 164, 37, 0.36)",
+        borderWidth: 1,
+        borderColor: "rgb(196, 164, 37)"
     },
 
     buttonText: {
