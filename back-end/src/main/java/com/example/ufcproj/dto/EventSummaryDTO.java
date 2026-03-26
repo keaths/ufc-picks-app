@@ -10,6 +10,9 @@ public record EventSummaryDTO(
         boolean picksLocked,
         boolean isTitle,
         FighterSummaryDTO redFighter,
-        FighterSummaryDTO blueFighter
+        FighterSummaryDTO blueFighter,
+        int pickCount,
+        int fightCount,
+        int correctPicks
 ) {
 }

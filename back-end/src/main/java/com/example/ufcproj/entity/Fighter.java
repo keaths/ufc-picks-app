@@ -50,6 +50,9 @@ public class Fighter {
     @Column(name = "draw")
     private Integer draw;
 
+    @Column(name = "ranking")
+    private Integer ranking;
+
     @Column(name = "headshot_url")
     private String headshotUrl;
 }

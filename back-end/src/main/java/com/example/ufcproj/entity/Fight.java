@@ -57,6 +57,9 @@ public class Fight {
     @Column(name = "stats_id")
     private String statsId;
 
+    @Column(name = "bout_order")
+    private Integer boutOrder;
+
     @Enumerated(EnumType.STRING)
     @Column
     private Status status;

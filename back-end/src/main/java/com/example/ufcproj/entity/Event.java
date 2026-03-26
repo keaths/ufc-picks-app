@@ -27,6 +27,7 @@ public class Event {
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @OrderBy("boutOrder ASC")
     private List<Fight> fights;
 
     @Enumerated(EnumType.STRING)

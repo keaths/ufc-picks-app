@@ -1,8 +1,11 @@
 package com.example.ufcproj.service;
 
+import com.example.ufcproj.dto.FighterSummaryDTO;
+import com.example.ufcproj.dto.PickDTO;
 import com.example.ufcproj.entity.Event;
 import com.example.ufcproj.entity.Fight;
 import com.example.ufcproj.entity.Pick;
+import com.example.ufcproj.entity.User;
 import com.example.ufcproj.repository.*;
 import com.example.ufcproj.requests.CreatePickRequest;
 import com.example.ufcproj.requests.UpdatePickRequest;
@@ -19,12 +22,14 @@ public class PickService {
     private final FightRepository fightRepository;
     private final FighterRepository fighterRepository;
     private final UserRepository userRepository;
+    private final EventService eventService;
 
-    public PickService(PicksRepository picksRepository, FightRepository fightRepository, FighterRepository fighterRepository, UserRepository userRepository){
+    public PickService(PicksRepository picksRepository, FightRepository fightRepository, FighterRepository fighterRepository, UserRepository userRepository, EventService eventService){
         this.picksRepository = picksRepository;
         this.fightRepository = fightRepository;
         this.fighterRepository = fighterRepository;
         this.userRepository = userRepository;
+        this.eventService = eventService;
     }
 
     public void lockPicksForEvent(Event event){
@@ -84,13 +89,17 @@ public class PickService {
 
     public void createPick(CreatePickRequest pickRequest){
         Fight fight = fightRepository.findByFightId(pickRequest.fightId());
+        User user = userRepository.findByUserId(pickRequest.userId());
 
-        Pick pick = new Pick();
+        Pick pick = picksRepository.findByUserAndFight(user, fight);
+        if(pick == null){
+            pick = new Pick();
+        }
         pick.setUser(userRepository.findByUserId(pickRequest.userId()));
         pick.setFight(fight);
         pick.setPickedFighter(fighterRepository.findByFighterId(pickRequest.pickedFighterId()));
         switch(pickRequest.method()){
-            case "KO":
+            case "KO_TKO":
                 pick.setPickedMethod(Pick.Method.KO_TKO);
                 break;
 
@@ -128,4 +137,24 @@ public class PickService {
             picksRepository.save(pick);
         }
     }
+
+    public List<PickDTO> getPicks(Long userId, Long eventId){
+        return
+                picksRepository.findByUserUserIdAndFightEventEventId(userId, eventId).stream()
+                .map(pick -> new PickDTO(
+                        pick.getUser().getUserId(),
+                        pick.getFight().getFightId(),
+                        pick.getPickedFighter().getFighterId(),
+                        eventService.mapFighter(pick.getPickedFighter()),
+                        pick.getPickedMethod().toString(),
+                        pick.getPredictedRound(),
+                        pick.getPointsAward()
+                ))
+                .toList();
+    }
+
+    public Integer getCount(Long userId, Long eventId){
+        return picksRepository.countByUserUserIdAndFightEventEventId(userId, eventId);
+    }
+
 }

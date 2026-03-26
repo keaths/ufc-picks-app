@@ -21,4 +21,19 @@ public interface PicksRepository extends JpaRepository<Pick, Long> {
 
     List<Pick> findByFightEvent(Event event);
 
+    Pick findByUserAndFight(User user, Fight fight);
+
+    List<Pick> findByUserUserIdAndFightEventEventId(Long userId, Long eventId);
+
+    Integer countByUserUserIdAndFightEventEventId(Long userId, Long eventId);
+
+    @Query(nativeQuery = true, value = """
+            select count(*) as correct
+            from picks p
+            join fights f on p.fight_id = f.fight_id
+            where p.user_id = :userId
+            and f.event_id = :eventId
+            and p.pick_result = "WIN"
+            """)
+    Integer getCorrectPicksforEvent(Long userId, Long eventId);
 }

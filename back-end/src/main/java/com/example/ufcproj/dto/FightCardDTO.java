@@ -6,6 +6,9 @@ public record FightCardDTO(
         boolean isTitleFight,
         String status,
         FighterSummaryDTO redFighter,
-        FighterSummaryDTO blueFighter
+        FighterSummaryDTO blueFighter,
+        String winnerCorner,
+        String method,
+        Integer endRound
 ) {
 }

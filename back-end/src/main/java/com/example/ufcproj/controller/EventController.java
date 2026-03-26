@@ -30,8 +30,18 @@ public class EventController {
         return eventService.getEventDetails(eventId);
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "Lambda works";
+    @GetMapping("/getPickedUpcomingEvents/{userId}")
+    public List<EventSummaryDTO> getPickedUpcomingEvents(@PathVariable Long userId){
+        return eventService.getPickedUpcomingEvents(userId);
+    }
+
+    @GetMapping("/getPickedPastEvents/{userId}")
+    public List<EventSummaryDTO> getPickedPastEvents(@PathVariable Long userId){
+        return eventService.getPickedPastEvents(userId);
+    }
+
+    @GetMapping("/getEventById/{eventId}")
+    public EventSummaryDTO getEventById(@PathVariable Long eventId){
+        return eventService.findByEventId(eventId);
     }
 }

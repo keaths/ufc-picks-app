@@ -20,11 +20,12 @@ public class UfcprojApplication {
 		SpringApplication.run(UfcprojApplication.class, args);
 	}
 
-//	@Bean
-//	public CommandLineRunner runAfterStartup(UfcUpdateJobService jobService) {
-//		return args -> {
+	@Bean
+	public CommandLineRunner runAfterStartup(UfcUpdateJobService jobService) {
+		return args -> {
 //			System.out.println("Running daily refresh locally...");
 //			jobService.convertToS3Url();
-//		};
-//	}
+//			jobService.runDailyRefresh();
+		};
+	}
 }
