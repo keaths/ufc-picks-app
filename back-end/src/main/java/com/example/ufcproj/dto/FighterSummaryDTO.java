@@ -6,6 +6,13 @@ public record FighterSummaryDTO(
         String lastName,
         String nickName,
         String imageUrl,
-        Integer ranking
+        Integer ranking,
+        String weightClass,
+        String height,
+        Double reach,
+        String stance,
+        Integer win,
+        Integer loss,
+        Integer draw
 ) {
 }

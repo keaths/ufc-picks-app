@@ -26,16 +26,13 @@ export default function EventDetailsScreen() {
 
     useEffect(() => {
         async function loadEvent() {
-            const eventDetData = await getEventDetails(Number(eventId));
-            setEventDetails(eventDetData);
+            const eventData = await getEventDetails(Number(eventId));
+            setEventDetails(eventData);
         }
 
         loadEvent();
 
     }, [eventId])
-
-    const eventDate = new Date(eventSummary?.eventDate + "T00:00:00");
-    eventDate.setDate(eventDate.getDate() + 1);
 
     useEffect(() => {
         async function loadPicks() {

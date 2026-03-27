@@ -12,10 +12,12 @@ type Props = {
     isSelected: Boolean,
     isDimmed: Boolean
     onPress: () => void,
-    isLocked: boolean
+    isLocked: boolean,
+    setShowModal: React.Dispatch<React.SetStateAction<Boolean>>;
+    setModalFighter: React.Dispatch<React.SetStateAction<FighterSummary | null>>
 }
 
-export default function FightCardFighter({ fighter, isSelected, onPress, isDimmed, isLocked }: Props) {
+export default function FightCardFighter({ fighter, isSelected, onPress, isDimmed, isLocked, setShowModal, setModalFighter }: Props) {
 
     const scale = useRef(new Animated.Value(1)).current;
     const opacity = useRef(new Animated.Value(1)).current;
@@ -64,6 +66,10 @@ export default function FightCardFighter({ fighter, isSelected, onPress, isDimme
                     onPressIn={() => handlePressIn()}
                     onPressOut={() => handlePressOut()}
                     onPress={onPress}
+                    onLongPress={(() => {
+                        setShowModal(true);
+                        setModalFighter(fighter);
+                    })}
                     disabled={isLocked}>
                     <Animated.View style={[isSelected ? styles.fighterImageContainerSelected : styles.fighterImageContainerNotSelected, { transform: [{ scale }] }]}>
                         <View style={styles.fighterImageContainer}>

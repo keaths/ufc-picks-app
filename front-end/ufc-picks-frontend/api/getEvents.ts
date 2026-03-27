@@ -1,9 +1,13 @@
+export async function getEvents() {
+  const baseApi = "https://263b9k85f2.execute-api.us-east-2.amazonaws.com";
 
+  const response = await fetch(`${baseApi}/api/events/getAllUpcoming`);
 
-export async function getEvents(){
-    const base_api = "https://263b9k85f2.execute-api.us-east-2.amazonaws.com";
+  if (!response.ok) {
+    throw new Error(`getEvents failed: ${response.status}`);
+  }
 
-    const data = await fetch(`${base_api}/api/events/getAllUpcoming`);
+  const json = await response.json();
 
-    return data.json();
+  return Array.isArray(json) ? json : [];
 }

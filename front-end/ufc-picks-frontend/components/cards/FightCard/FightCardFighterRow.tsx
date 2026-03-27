@@ -1,7 +1,7 @@
 import { getEventDetails } from "@/api/getEventDetails";
 import { EventDetails } from "@/types/EventDetails";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, Image, Pressable, Animated } from "react-native";
 import FightCardTopper from "./FightCardTopper";
 import FightCardFighter from "./FightCardFighter";
@@ -18,13 +18,15 @@ type Props = {
     isEditing: Boolean;
     setSelectedMethod: React.Dispatch<React.SetStateAction<Method | null>>;
     setSelectedRound: React.Dispatch<React.SetStateAction<number | null>>;
+    setShowModal: React.Dispatch<React.SetStateAction<Boolean>>;
+    setModalFigther: React.Dispatch<React.SetStateAction<FighterSummary | null>>;
 
 }
 
 type Method = "KO_TKO" | "SUBMISSION" | "DECISION"
 
 
-export default function FightCardFighterRow({ redFighter, blueFighter, selectedFighter, setSelectedFighter, isLocked, isEditing, setSelectedMethod, setSelectedRound }: Props) {
+export default function FightCardFighterRow({ redFighter, blueFighter, selectedFighter, setSelectedFighter, isLocked, isEditing, setSelectedMethod, setSelectedRound, setShowModal, setModalFigther }: Props) {
 
     const isRedSelected = selectedFighter?.fighterId === redFighter.fighterId;
     const isBlueSelected = selectedFighter?.fighterId === blueFighter.fighterId;
@@ -56,7 +58,9 @@ export default function FightCardFighterRow({ redFighter, blueFighter, selectedF
                     isSelected={isRedSelected}
                     onPress={() => handleSelection(redFighter)}
                     isDimmed={shouldDimRed}
-                    isLocked={isLocked} />
+                    isLocked={isLocked} 
+                    setShowModal={setShowModal} 
+                    setModalFighter={setModalFigther} />
                 <View style={styles.vs}>
                     <Text style={styles.vsText}>VS</Text>
                 </View>
@@ -65,7 +69,9 @@ export default function FightCardFighterRow({ redFighter, blueFighter, selectedF
                     isSelected={isBlueSelected}
                     onPress={() => handleSelection(blueFighter)}
                     isDimmed={shouldDimBlue}
-                    isLocked={isLocked} />
+                    isLocked={isLocked} 
+                    setShowModal={setShowModal} 
+                    setModalFighter={setModalFigther} />
             </View>
         </LinearGradient>
     )

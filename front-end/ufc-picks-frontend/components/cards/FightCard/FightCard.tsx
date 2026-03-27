@@ -15,6 +15,7 @@ import { Picks } from "@/types/Picks";
 import { getPicks } from "@/api/getPicks";
 import { PickRequest } from "@/types/PickRequest";
 import { COLORS } from "@/theme/colors";
+import FighterModal from "./FighterModal/FighterModal";
 
 type Props = {
     fight: Fight,
@@ -34,6 +35,9 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
     const [isEditing, setIsEditing] = useState<Boolean>(false);
     const [isLocked, setIsLocked] = useState<Boolean>(false);
     const [isPast, setIsPast] = useState<Boolean>(fight.status === "COMPLETED")
+    const [fighterPreview, setFighterPreview] = useState<Boolean>(false);
+    const [showModal, setShowModal] = useState<Boolean>(false);
+    const [modalFighter, setModalFighter] = useState<FighterSummary | null>(null);
 
     console.log(fight.winnerCorner)
 
@@ -68,6 +72,8 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
 
     const saveHeight = useRef(new Animated.Value(0)).current;
     const saveOpacity = useRef(new Animated.Value(0)).current;
+
+    
 
     useEffect(() => {
         Animated.parallel([
@@ -160,12 +166,10 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
             });
 
             if (!response.ok) {
-                console.log("oops")
             }
 
             setIsSaved(true);
         } catch (error) {
-            console.log(error);
         }
     }
 
@@ -176,8 +180,6 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
 
     const opacity = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(10)).current;
-
-    console.log(existingPick)
 
     function handleFightCard() {
         if (isSaved && !isPast) {
@@ -215,6 +217,8 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
         }
     }
 
+    console.log(modalFighter);
+
 
     useEffect(() => {
         Animated.parallel([
@@ -238,6 +242,15 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
     return (
         <Animated.View style={{ opacity: opacity, transform: [{ translateY: translateY }] }}>
 
+            {showModal ? 
+            
+            <FighterModal 
+                    fighter={modalFighter}
+                    setShowModal={setShowModal} 
+                    setModalFighter={setModalFighter}/>
+            :
+            <></>
+            }
             <View style={styles.test}>
                 <FightCardTopper weightClass={fight.weightClass} isTitleBout={fight.isTitleFight} />
                 <FightCardFighterRow
@@ -248,7 +261,9 @@ export default function FightCard({ fight, eventId, existingPick, index }: Props
                     setSelectedMethod={setSelectedMethod}
                     setSelectedRound={setSelectedRound}
                     isLocked={isSaved}
-                    isEditing={isEditing} />
+                    isEditing={isEditing} 
+                    setShowModal={setShowModal} 
+                    setModalFigther={setModalFighter} />
                 {!showMethodMenu && !showRoundMenu && !showSaveButton &&
                     <View style={{ height: isPast ? 60 : 40, borderTopWidth: 1, backgroundColor: "#202020" }}>
                         {handleFightCard()}

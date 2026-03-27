@@ -16,7 +16,7 @@ import ProfileFuturePastButton from "@/components/profile/ProfileFuturePastButto
 export default function Profile({ }) {
 
   const [pickedUpcomingEvents, setPickedUpcomingEvents] = useState<Event[]>([]);
-  const [pickedPastEvents, setPickedPastEvnents] = useState<Event[]>([]);
+  const [pickedPastEvents, setPickedPastEvents] = useState<Event[]>([]);
 
   const [animationKey, setAnimationKey] = useState(0);
   const [isUpcoming, setIsUpcoming] = useState<Boolean>(true);
@@ -28,15 +28,23 @@ export default function Profile({ }) {
       const upcoming = await getUpcomingPickedEvents();
       setPickedUpcomingEvents(upcoming);
       const past = await getPastPickedEvents();
-      setPickedPastEvnents(past);
+      setPickedPastEvents(past);
     };
     loadPickedEvents();
   }, [])
 
-  const loadProfileAndPicks = async () => {
-    const data = await getUpcomingPickedEvents();
-    setPickedUpcomingEvents(data);
+const loadProfileAndPicks = async () => {
+  try {
+    const upcoming = await getUpcomingPickedEvents();
+    const past = await getPastPickedEvents();
+
+    setPickedUpcomingEvents(Array.isArray(upcoming) ? upcoming : []);
+    setPickedPastEvents(Array.isArray(past) ? past : []);
+  } catch (error) {
+    setPickedUpcomingEvents([]);
+    setPickedPastEvents([]);
   }
+};
 
   useFocusEffect(
     React.useCallback(() => {
@@ -50,8 +58,6 @@ export default function Profile({ }) {
       setAnimationKey((prev) => prev + 1);
     }, [])
   );
-
-  console.log(isUpcoming);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -78,21 +84,18 @@ export default function Profile({ }) {
             isUpcoming={isUpcoming}
           />
         ))
-        :
-        pickedPastEvents.map((event, index) => {
-          return (
-            <ProfilePicks
-              key={event.eventId}
-              event={event}
-              index={index}
-              animationKey={animationKey}
-              onOpen={() => {
-                skipNextAnim.current = true;
-              }}
-              isUpcoming={isUpcoming}
-            />
-          )
-        })
+        : (Array.isArray(pickedPastEvents) ? pickedPastEvents : []).map((event, index) => (
+          <ProfilePicks
+            key={event.eventId}
+            event={event}
+            index={index}
+            animationKey={animationKey}
+            onOpen={() => {
+              skipNextAnim.current = true;
+            }}
+            isUpcoming={isUpcoming}
+          />
+        ))
       }
 
     </ScrollView>

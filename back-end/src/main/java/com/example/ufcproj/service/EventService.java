@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -34,8 +35,14 @@ public class EventService {
                         event.getLocation(),
                         event.isPicksLocked(),
                         event.getFights().getFirst().getIsTitleBout(),
-                        mapFighter(event.getFights().getFirst().getRedFighterId()),
-                        mapFighter(event.getFights().getFirst().getBlueFighterId()),
+                        mapFighter(Objects.requireNonNull(event.getFights().stream()
+                                .filter(f -> f.getBoutOrder() != null)
+                                .findFirst()
+                                .orElse(null)).getRedFighterId()),
+                        mapFighter(Objects.requireNonNull(event.getFights().stream()
+                                .filter(f -> f.getBoutOrder() != null)
+                                .findFirst()
+                                .orElse(null)).getBlueFighterId()),
                         picksRepo.countByUserUserIdAndFightEventEventId(1L, event.getEventId()),
                         event.getFights().size(),
                         picksRepo.getCorrectPicksforEvent(1L, event.getEventId())
@@ -52,9 +59,15 @@ public class EventService {
                         event.getLocation(),
                         event.isPicksLocked(),
                         event.getFights().getFirst().getIsTitleBout(),
-                        mapFighter(event.getFights().getFirst().getRedFighterId()),
-                        mapFighter(event.getFights().getFirst().getBlueFighterId()),
-                        picksRepo.countByUserUserIdAndFightEventEventId(1L, event.getEventId()),
+                mapFighter(Objects.requireNonNull(event.getFights().stream()
+                        .filter(f -> f.getBoutOrder() != null)
+                        .findFirst()
+                        .orElse(null)).getRedFighterId()),
+                mapFighter(Objects.requireNonNull(event.getFights().stream()
+                        .filter(f -> f.getBoutOrder() != null)
+                        .findFirst()
+                        .orElse(null)).getBlueFighterId()),
+                picksRepo.countByUserUserIdAndFightEventEventId(1L, event.getEventId()),
                         event.getFights().size(),
                         picksRepo.getCorrectPicksforEvent(1L, event.getEventId())
                 );
@@ -71,8 +84,14 @@ public class EventService {
                         event.getLocation(),
                         event.isPicksLocked(),
                         event.getFights().getFirst().getIsTitleBout(),
-                        mapFighter(event.getFights().getFirst().getRedFighterId()),
-                        mapFighter(event.getFights().getFirst().getBlueFighterId()),
+                        mapFighter(Objects.requireNonNull(event.getFights().stream()
+                                .filter(f -> f.getBoutOrder() != null)
+                                .findFirst()
+                                .orElse(null)).getRedFighterId()),
+                        mapFighter(Objects.requireNonNull(event.getFights().stream()
+                                .filter(f -> f.getBoutOrder() != null)
+                                .findFirst()
+                                .orElse(null)).getBlueFighterId()),
                         picksRepo.countByUserUserIdAndFightEventEventId(1L, event.getEventId()),
                         event.getFights().size(),
                         picksRepo.getCorrectPicksforEvent(1L, event.getEventId())
@@ -90,8 +109,14 @@ public class EventService {
                         event.getLocation(),
                         event.isPicksLocked(),
                         event.getFights().getFirst().getIsTitleBout(),
-                        mapFighter(event.getFights().getFirst().getRedFighterId()),
-                        mapFighter(event.getFights().getFirst().getBlueFighterId()),
+                        mapFighter(Objects.requireNonNull(event.getFights().stream()
+                                .filter(f -> f.getBoutOrder() != null)
+                                .findFirst()
+                                .orElse(null)).getRedFighterId()),
+                        mapFighter(Objects.requireNonNull(event.getFights().stream()
+                                .filter(f -> f.getBoutOrder() != null)
+                                .findFirst()
+                                .orElse(null)).getBlueFighterId()),
                         picksRepo.countByUserUserIdAndFightEventEventId(1L, event.getEventId()),
                         event.getFights().size(),
                         picksRepo.getCorrectPicksforEvent(1L, event.getEventId())
@@ -115,7 +140,15 @@ public class EventService {
                 fighter.getLastName(),
                 fighter.getNickname(),
                 fighter.getHeadshotUrl(),
-                fighter.getRanking()
+                fighter.getRanking(),
+                fighter.getWeight(),
+                convertLength(fighter.getHeight()),
+                fighter.getReach(),
+                fighter.getStance(),
+                fighter.getWin(),
+                fighter.getLoss(),
+                fighter.getDraw()
+
         );
     }
 
@@ -155,6 +188,15 @@ public class EventService {
         } else {
             return methodDetail.toString();
         }
+    }
+
+    private String convertLength(Integer length){
+        int feet = length % 12;
+        int inches = length - (6 * feet);
+
+        String finalLength = "" + feet + "'" + inches;
+
+        return finalLength;
     }
 
 }
