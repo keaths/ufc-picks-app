@@ -32,7 +32,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                     FROM picks p
                     JOIN fights f ON p.fight_id = f.fight_id
                     JOIN events e ON f.event_id = e.event_id
-                    WHERE e.event_date > NOW()
+                    WHERE e.event_date >= CURDATE()
                     AND p.user_id = :userId
                     ORDER BY e.event_date ASC
 """, nativeQuery = true)
@@ -43,8 +43,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                     FROM picks p
                     JOIN fights f ON p.fight_id = f.fight_id
                     JOIN events e ON f.event_id = e.event_id
-                    WHERE e.event_date < NOW()
+                    WHERE e.event_date < CURDATE()
                     AND p.user_id = :userId
+                    AND f.status = "COMPLETED"
                     ORDER BY e.event_date DESC
 """, nativeQuery = true)
     List<Event> findPastPickedEvents(@Param("userId") Long userId);

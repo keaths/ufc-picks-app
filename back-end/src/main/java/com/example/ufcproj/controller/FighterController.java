@@ -1,5 +1,6 @@
 package com.example.ufcproj.controller;
 
+import com.example.ufcproj.dto.FightCardDTO;
 import com.example.ufcproj.entity.Fighter;
 import com.example.ufcproj.service.FighterService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,5 +23,7 @@ public class FighterController {
     public List<Fighter> getAllFighters(){
         return fighterService.getAllFighters();
     }
+
+
 
 }

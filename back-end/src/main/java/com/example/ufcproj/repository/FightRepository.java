@@ -33,4 +33,16 @@ public interface FightRepository extends JpaRepository <Fight, Long> {
     Fight findByStatsId(String statsId);
 
     boolean existsByEvent_EventIdAndStatus(Event upComingEvent, Fight.Status status);
+
+    @Query(value = """
+            SELECT\s
+                f.*
+            FROM fights f
+            JOIN events e ON f.event_id = e.event_id
+            WHERE (f.red_fighter_id = :fighterId OR f.blue_fighter_id = :fighterId)
+              AND f.status = 'COMPLETED'
+            ORDER BY e.event_date DESC
+            LIMIT 5;
+            """, nativeQuery = true)
+    List<Fight> findLast5(Long fighterId);
 }

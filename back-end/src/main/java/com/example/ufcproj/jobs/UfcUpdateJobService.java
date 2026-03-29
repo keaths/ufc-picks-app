@@ -359,6 +359,7 @@ public class UfcUpdateJobService {
                         String finalStatsId = statsId;
                         fights.removeIf(f -> f.getStatsId().equals(finalStatsId));
                     }
+                    index ++;
                 }
                 if (!fights.isEmpty()) {
                     for (Fight fight : fights) {
