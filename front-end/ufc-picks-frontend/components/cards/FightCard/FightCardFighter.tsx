@@ -15,9 +15,11 @@ type Props = {
     isLocked: boolean,
     setShowModal: React.Dispatch<React.SetStateAction<Boolean>>;
     setModalFighter: React.Dispatch<React.SetStateAction<FighterSummary | null>>
+    isPast: boolean
+    isSaved: boolean
 }
 
-export default function FightCardFighter({ fighter, isSelected, onPress, isDimmed, isLocked, setShowModal, setModalFighter }: Props) {
+export default function FightCardFighter({ fighter, isSelected, onPress, isDimmed, isLocked, setShowModal, setModalFighter, isPast, isSaved }: Props) {
 
     const scale = useRef(new Animated.Value(1)).current;
     const opacity = useRef(new Animated.Value(1)).current;
@@ -59,6 +61,48 @@ export default function FightCardFighter({ fighter, isSelected, onPress, isDimme
         }
     }
 
+    if(fighter.lastName === "Erosa" && !isSaved && isPast){
+        console.log("yep")
+    }
+
+    function handleSave() {
+        if (isPast && isSelected) {
+            return (
+                <Animated.View style={styles.fighterImageContainerSelected}>
+                    <View style={styles.fighterImageContainer}>
+                        <Image source={{ uri: fighter.imageUrl }} style={styles.fighterImage} />
+                    </View>
+                </Animated.View>
+            )
+        } else if (isPast && !isSelected && isSaved) {
+            return (
+            <Animated.View style={styles.fighterImageContainerNotSelected}>
+                <View style={styles.fighterImageContainer}>
+                    <Image source={{ uri: fighter.imageUrl }} style={styles.fighterImage} />
+                </View>
+            </Animated.View>
+            )
+        } else if (isPast && !isSelected && !isSaved) {
+            return (
+            <Animated.View style={[styles.fighterImageContainerNotSelected, {opacity: .4}]}>
+                <View style={styles.fighterImageContainer}>
+                    <Image source={{ uri: fighter.imageUrl }} style={styles.fighterImage} />
+                </View>
+            </Animated.View>
+            )
+        }
+
+        else if (!isPast) {
+            return (
+                <Animated.View style={[isSelected ? styles.fighterImageContainerSelected : styles.fighterImageContainerNotSelected, { transform: [{ scale }] }]}>
+                    <View style={styles.fighterImageContainer}>
+                        <Image source={{ uri: fighter.imageUrl }} style={styles.fighterImage} />
+                    </View>
+                </Animated.View>
+            )
+        }
+    }
+
     return (
         <Animated.View style={[styles.testFighterContainer, { opacity }]}>
             <View style={styles.fighterContainer}>
@@ -70,18 +114,14 @@ export default function FightCardFighter({ fighter, isSelected, onPress, isDimme
                         setShowModal(true);
                         setModalFighter(fighter);
                     })}
-                    disabled={isLocked}>
-                    <Animated.View style={[isSelected ? styles.fighterImageContainerSelected : styles.fighterImageContainerNotSelected, { transform: [{ scale }] }]}>
-                        <View style={styles.fighterImageContainer}>
-                            <Image source={{ uri: fighter.imageUrl }} style={styles.fighterImage} />
-                        </View>
-                    </Animated.View>
+                    disabled={isLocked || isPast}>
+                    {handleSave()}
                 </Pressable>
             </View>
             <View style={styles.fighterNameContainer}>
                 {fighter.ranking !== null ?
-                    <View style={[{ marginEnd: 2, alignItems: "center", justifyContent:"center", height: 18, width: 18, backgroundColor: "#2b2b2b", borderRadius: 9}, fighter.ranking === 1 ? {backgroundColor: COLORS.goldText} : {backgroundColor: "#2b2b2b"}]}>
-                        <Text style={{color: COLORS.lightText, fontWeight: 700, fontSize: 12}}>{fighter.ranking === 1 ? "C" : `${fighter.ranking - 1}`}</Text>
+                    <View style={[{ marginEnd: 2, alignItems: "center", justifyContent: "center", height: 18, width: 18, backgroundColor: "#2b2b2b", borderRadius: 9 }, fighter.ranking === 1 ? { backgroundColor: COLORS.goldText } : { backgroundColor: "#2b2b2b" }]}>
+                        <Text style={{ color: COLORS.lightText, fontWeight: 700, fontSize: 12 }}>{fighter.ranking === 1 ? "C" : `${fighter.ranking - 1}`}</Text>
                     </View>
                     :
                     <></>

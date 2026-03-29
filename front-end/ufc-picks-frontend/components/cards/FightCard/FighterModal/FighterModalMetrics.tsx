@@ -18,16 +18,16 @@ export default function FighterModalMetrics({ fighter }: Props) {
 
         <View style={styles.metricContainer}>
             <View style={styles.metricOutline}>
-                <Text style={styles.metricTitle}>Record: <Text style={styles.metric}>11-2-4</Text></Text>
+                <Text style={styles.metricTitle}>Record: <Text style={styles.metric}>{fighter?.win}-{fighter?.loss}-{fighter?.draw}</Text></Text>
             </View>
             <View style={styles.metricOutline}>
-                <Text style={styles.metricTitle}>Weight: <Text style={styles.metric}>170 lb</Text></Text>
+                <Text style={styles.metricTitle}>Weight: <Text style={styles.metric}>{fighter?.weightClass}</Text></Text>
             </View>
             <View style={styles.metricOutline}>
-                <Text style={styles.metricTitle}>Reach: <Text style={styles.metric}>75.5"</Text></Text>
+                <Text style={styles.metricTitle}>Reach: <Text style={styles.metric}>{fighter?.reach}"</Text></Text>
             </View>
             <View style={styles.metricOutline}>
-                <Text style={styles.metricTitle}>Stance: <Text style={styles.metric}>Orthodox</Text></Text>
+                <Text style={styles.metricTitle}>Stance: <Text style={styles.metric}>{fighter?.stance}</Text></Text>
             </View>
         </View>
     )

@@ -1,7 +1,7 @@
 import { getEventDetails } from "@/api/getEventDetails";
 import { EventDetails } from "@/types/EventDetails";
 import { useLocalSearchParams } from "expo-router";
-import { SetStateAction, useEffect, useRef, useState } from "react";
+import { SetStateAction, use, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, Image, Pressable, Animated, Modal } from "react-native";
 import { FighterSummary } from "@/types/FighterSummary";
 import { COLORS } from "@/theme/colors";
@@ -9,15 +9,29 @@ import { LinearGradient } from "expo-linear-gradient";
 import FighterModalMetrics from "./FighterModalMetrics";
 import FighterModalLast5 from "./FighterModalLast5";
 import FighterModalClose from "./FighterModalClose";
+import { getLast5Fights } from "@/api/getLast5Fights";
+import { Fight } from "@/types/FightCard";
 
 type Props = {
     fighter: FighterSummary | null,
     setShowModal: React.Dispatch<React.SetStateAction<Boolean>>;
     setModalFighter: React.Dispatch<React.SetStateAction<FighterSummary | null>>;
-
 }
 
 export default function FighterModal({ fighter, setShowModal, setModalFighter }: Props) {
+
+    const figherId = fighter && fighter.fighterId;
+
+    const [last5Fights, setLast5Fights] = useState<Fight[]>([]);
+
+    useEffect(() => {
+        async function loadLast5() {
+            const last5 = await getLast5Fights(figherId);
+            setLast5Fights(last5);
+        };
+        loadLast5();
+    }, [])
+
 
     return (
         <Modal
@@ -38,11 +52,11 @@ export default function FighterModal({ fighter, setShowModal, setModalFighter }:
                     <View style={{ height: "85%", width: "100%", paddingStart: 15, paddingEnd: 15, borderWidth: 2 }}>
                         <View style={{ height: "18%", width: "100%", justifyContent: "center", alignItems: "flex-end", flexDirection: "row" }}>
                             {fighter?.ranking === null ?
-                            <></>
-                            :
-                            <View style={[{ marginEnd: 2, alignItems: "center", justifyContent: "center", height: 18, width: 18, borderRadius: 9 }, fighter?.ranking === 1 ? { backgroundColor: COLORS.goldText } : { backgroundColor: "rgba(0, 0, 0, 0.45)" }]}>                             
-                                    <Text style={{ color: COLORS.lightText, fontWeight: 700, fontSize: 12 }}>{fighter?.ranking === 1 ? "C" : `${fighter && fighter.ranking - 1}`}</Text>                                    
-                            </View>
+                                <></>
+                                :
+                                <View style={[{ marginEnd: 2, alignItems: "center", justifyContent: "center", height: 18, width: 18, borderRadius: 9 }, fighter?.ranking === 1 ? { backgroundColor: COLORS.goldText } : { backgroundColor: "rgba(0, 0, 0, 0.45)" }]}>
+                                    <Text style={{ color: COLORS.lightText, fontWeight: 700, fontSize: 12 }}>{fighter?.ranking === 1 ? "C" : `${fighter && fighter.ranking - 1}`}</Text>
+                                </View>
                             }
                             <Text style={styles.fighterName}> {fighter?.firstName.toLocaleUpperCase()} {fighter?.lastName.toLocaleUpperCase()}</Text>
                         </View>
@@ -50,7 +64,7 @@ export default function FighterModal({ fighter, setShowModal, setModalFighter }:
                             <Text style={styles.fighterNickName}>{fighter?.nickName}</Text>
                         </View>
                         <FighterModalMetrics fighter={fighter} />
-                        <FighterModalLast5 fighter={fighter} />
+                        <FighterModalLast5 fighter={fighter} last5={last5Fights} />
                         <FighterModalClose setShowModal={setShowModal} setModalFighter={setModalFighter} />
                     </View>
                 </View>

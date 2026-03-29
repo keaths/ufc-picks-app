@@ -8,12 +8,16 @@ import { COLORS } from "@/theme/colors";
 import { LinearGradient } from "expo-linear-gradient";
 import FighterModalMetrics from "./FighterModalMetrics";
 import FighterModalFight from "./FighterModalFight";
+import { Fight } from "@/types/FightCard";
 
 type Props = {
     fighter: FighterSummary | null,
+    last5: Fight[] | null
 }
 
-export default function FighterModalLast5({ fighter }: Props) {
+export default function FighterModalLast5({ fighter, last5 }: Props) {
+
+    console.log(last5);
 
     return (
         <View style={{ height: "38%", width: "100%", borderColor: "rgba(0, 0, 0, 0.21)" }}>
@@ -21,11 +25,9 @@ export default function FighterModalLast5({ fighter }: Props) {
                 <Text style={styles.metricTitle}>Last 5 fights</Text>
             </View>
             <View style={{ height: "80%", width: "100%" }}>
-                <FighterModalFight fighter={fighter}/>
-                <FighterModalFight fighter={fighter}/>
-                <FighterModalFight fighter={fighter}/>
-                <FighterModalFight fighter={fighter}/>
-                <FighterModalFight fighter={fighter}/>
+                {(Array.isArray(last5) ? last5 : []).map((fight) => (
+                    <FighterModalFight fight={fight} key={fight.fightId} fighter={fighter}/>
+                ))}
             </View>
         </View>
 

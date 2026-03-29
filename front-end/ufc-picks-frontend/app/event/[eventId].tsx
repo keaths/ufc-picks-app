@@ -19,7 +19,7 @@ export default function EventDetailsScreen() {
 
     const picksByFightId = useMemo(() => {
         return Object.fromEntries(
-            picks.map((pick) => [pick.fightId, pick])
+            (Array.isArray(picks) ? picks : []).map((pick) => [pick.fightId, pick])
         );
     }, [picks]);
 
@@ -36,12 +36,18 @@ export default function EventDetailsScreen() {
 
     useEffect(() => {
         async function loadPicks() {
-            const data = await getPicks(1, Number(eventId));
-            setPicks(data);
-
+            try {
+                const data = await getPicks(1, Number(eventId));
+                console.log("picks response:", data);
+                setPicks(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.log("failed to load picks:", error);
+                setPicks([]);
+            }
         }
+
         loadPicks();
-    }, [])
+    }, [eventId]);
 
     return (
         <ScrollView contentContainerStyle={styles.container}>

@@ -22,14 +22,13 @@ type Props = {
     winnerCorner: string,
     method: string,
     endRound: number,
-    pointAward: number | null
+    pointAward: number | null,
+    isLocked: Boolean
 }
 
 type Method = "KO_TKO" | "SUBMISSION" | "DECISION"
 
-export default function FightCardPrediction({ selectedFighter, selectedRound, selectedMethod, setIsEditing, onPress, isPast, winnerCorner, method, endRound, redFighter, blueFighter, pointAward }: Props) {
-
-    console.log(winnerCorner)
+export default function FightCardPrediction({ selectedFighter, selectedRound, selectedMethod, setIsEditing, onPress, isPast, winnerCorner, method, endRound, redFighter, blueFighter, pointAward, isLocked }: Props) {
 
     function handlePrediction() {
         if (selectedMethod === "DECISION") {
@@ -111,6 +110,7 @@ export default function FightCardPrediction({ selectedFighter, selectedRound, se
         )
     }
 
+    console.log(selectedFighter?.lastName)
 
     return (
         <LinearGradient
@@ -121,7 +121,8 @@ export default function FightCardPrediction({ selectedFighter, selectedRound, se
 
             {isPast ?
                 <View style={{ height: "100%", flexDirection: "row" }}>
-                    <View style={{marginEnd: "auto"}}>
+
+                    <View style={{ marginEnd: "auto" }}>
                         <View style={styles.fightTopper}>
                             {handlePrediction()}
                         </View>
@@ -129,10 +130,12 @@ export default function FightCardPrediction({ selectedFighter, selectedRound, se
                             {handleResult()}
                         </View>
                     </View>
-                    <View style={{width: "25%", padding: 10, justifyContent: "center", alignItems: "center"}}>
-                        <Text style={{fontSize: 18, fontWeight: 700, color: COLORS.lightText}}>+
-                            {pointAward != null ? 
-                                <CountUp value={pointAward}/>
+
+
+                    <View style={{ width: "25%", padding: 10, justifyContent: "center", alignItems: "center" }}>
+                        <Text style={{ fontSize: 18, fontWeight: 700, color: COLORS.lightText }}>+
+                            {pointAward != null ?
+                                <CountUp value={pointAward} />
                                 :
                                 "0 "
                             }
@@ -143,7 +146,11 @@ export default function FightCardPrediction({ selectedFighter, selectedRound, se
                 <View style={styles.fightTopperUpcoming}>
                     {handlePrediction()}
                     <View style={styles.editButtonContainer}>
-                        <OptionButton label={"Edit"} onPress={onPress} selected={false} />
+                        {isLocked ?
+                            <MaterialCommunityIcons name="lock" size={24} color={COLORS.goldText} />
+                            :
+                            <OptionButton label={"Edit"} onPress={onPress} selected={false} />
+                        }
                     </View>
                 </View>
             }

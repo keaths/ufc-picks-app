@@ -49,6 +49,7 @@ export default function ProfileFuturePastButton({ setIsUpcoming, isUpcoming }: P
                     onPressOut={handlePressOut}
                     onPress={(() => {
                         setIsUpcoming(true);
+                        console.log(isUpcoming);
                     })}>
                     {isUpcoming ?
                         <LinearGradient
@@ -74,6 +75,7 @@ export default function ProfileFuturePastButton({ setIsUpcoming, isUpcoming }: P
                     onPressOut={handlePressOut}
                     onPress={(() => {
                         setIsUpcoming(false);
+                        console.log(isUpcoming);
                     })}>
                     {!isUpcoming ?
                         <LinearGradient

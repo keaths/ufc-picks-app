@@ -22,10 +22,9 @@ export default function HomeScreen() {
 
     try {
       const data = await getEvents();
-
       setEvents(data);
-
     } catch (error) {
+      console.log(error);
     } finally {
       isLoadingRef.current = false;
     }

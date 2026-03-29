@@ -16,17 +16,19 @@ type Props = {
     setSelectedFighter: React.Dispatch<React.SetStateAction<FighterSummary | null>>;
     isLocked: boolean;
     isEditing: Boolean;
+    isPast: boolean;
     setSelectedMethod: React.Dispatch<React.SetStateAction<Method | null>>;
     setSelectedRound: React.Dispatch<React.SetStateAction<number | null>>;
     setShowModal: React.Dispatch<React.SetStateAction<Boolean>>;
     setModalFigther: React.Dispatch<React.SetStateAction<FighterSummary | null>>;
+    isSaved: boolean
 
 }
 
 type Method = "KO_TKO" | "SUBMISSION" | "DECISION"
 
 
-export default function FightCardFighterRow({ redFighter, blueFighter, selectedFighter, setSelectedFighter, isLocked, isEditing, setSelectedMethod, setSelectedRound, setShowModal, setModalFigther }: Props) {
+export default function FightCardFighterRow({ redFighter, blueFighter, selectedFighter, setSelectedFighter, isLocked, isEditing, setSelectedMethod, setSelectedRound, setShowModal, setModalFigther, isPast, isSaved }: Props) {
 
     const isRedSelected = selectedFighter?.fighterId === redFighter.fighterId;
     const isBlueSelected = selectedFighter?.fighterId === blueFighter.fighterId;
@@ -47,7 +49,7 @@ export default function FightCardFighterRow({ redFighter, blueFighter, selectedF
     }
 
     return (
-        <LinearGradient 
+        <LinearGradient
             style={styles.gradient}
             colors={["rgba(194, 173, 105, 0.4)", "rgba(194, 173, 105, 0.47)", "rgba(194, 173, 105, 0.28)"]}
             start={{ x: 0, y: 0 }}
@@ -58,9 +60,11 @@ export default function FightCardFighterRow({ redFighter, blueFighter, selectedF
                     isSelected={isRedSelected}
                     onPress={() => handleSelection(redFighter)}
                     isDimmed={shouldDimRed}
-                    isLocked={isLocked} 
-                    setShowModal={setShowModal} 
-                    setModalFighter={setModalFigther} />
+                    isLocked={isLocked}
+                    setShowModal={setShowModal}
+                    setModalFighter={setModalFigther}
+                    isPast={isPast} 
+                    isSaved={isSaved} />
                 <View style={styles.vs}>
                     <Text style={styles.vsText}>VS</Text>
                 </View>
@@ -69,9 +73,11 @@ export default function FightCardFighterRow({ redFighter, blueFighter, selectedF
                     isSelected={isBlueSelected}
                     onPress={() => handleSelection(blueFighter)}
                     isDimmed={shouldDimBlue}
-                    isLocked={isLocked} 
-                    setShowModal={setShowModal} 
-                    setModalFighter={setModalFigther} />
+                    isLocked={isLocked}
+                    setShowModal={setShowModal}
+                    setModalFighter={setModalFigther}
+                    isPast={isPast} 
+                    isSaved={isSaved} />
             </View>
         </LinearGradient>
     )
