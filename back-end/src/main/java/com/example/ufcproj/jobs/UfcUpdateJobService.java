@@ -118,7 +118,6 @@ public class UfcUpdateJobService {
 
     @Transactional
     public void runPollToday() throws InterruptedException, IOException {
-        System.out.println("TESTING TESTING TESTING");
         LocalDate today = LocalDate.now(ZoneId.of("America/New_York"));
         Event upcomingEvent = eventRepository.findByStatusAndEventDate(Event.Status.SCHEDULED, today);
         if(upcomingEvent == null){
@@ -428,53 +427,82 @@ public class UfcUpdateJobService {
         Fighter fighter = fighterRepository.findByUfcStatId(statId);
 
         if (fighter == null) {
-            addNewFighter(fighterRepository, first, last, weightclass);
-            fighter = fighterRepository.findByUfcStatId(statId);
+            fighter = addNewFighter(fighterRepository, statId, weightclass);
         }
 
         return fighter;
     }
 
     @Transactional
-    public void addNewFighter(FighterRepository fighterRepository, String firstName, String lastName, String weightClass) throws IOException {
-        Document searchFighter = Jsoup.connect("http://ufcstats.com/statistics/fighters/search?query=" + lastName).get();
-        ArrayList<Element> fighters = searchFighter.select("tbody tr");
-        fighters.removeFirst();
+    public Fighter addNewFighter(FighterRepository fighterRepository, String statsId, String weightClass) throws IOException {
 
-        for(int i = 0; i < fighters.size(); i++){
-            if(fighters.get(i).select("td:nth-child(1) a").text().trim().equals(firstName) && fighters.get(i).select("td:nth-child(2) a").text().trim().equals(lastName)){
-                Fighter fighter = new Fighter();
-                fighter.setUfcStatId(fighters.get(i).select("td:nth-child(1) a").attr("abs:href").split("/")[4]);
-                fighter.setFirstName(fighters.get(i).select("td:nth-child(1)").text().trim());
-                fighter.setLastName(fighters.get(i).select("td:nth-child(2)").text().trim());
-                String nickName = fighters.get(i).select("td:nth-child(3)").text().trim();
-                fighter.setWeight(weightClass);
-                if (!nickName.isEmpty()) {
-                    fighter.setNickname(fighters.get(i).select("td:nth-child(3)").text().trim());
-                }
-                String heightString = fighters.get(i).select("td:nth-child(4)").text().trim();
-                int height = 0;
-                if (!heightString.contains("--")) {
-                    fighter.setHeight(height = parseHeight(heightString));
-                }
-                String reachString = fighters.get(i).select("td:nth-child(6)").text().trim();
-                double reach = 0;
-                if (!reachString.contains("--")) {
-                    fighter.setReach(Double.parseDouble(fighters.get(i).select("td:nth-child(6)").text().trim().replace("\"", "")));
-                }
-                String stance = fighters.get(i).select("td:nth-child(7)").text().trim();
-                if (!stance.isEmpty()) {
-                    fighter.setStance(fighters.get(i).select("td:nth-child(7)").text().trim());
-                }
-                fighter.setWin(Integer.parseInt(fighters.get(i).select("td:nth-child(8)").text().trim()));
-                fighter.setLoss(Integer.parseInt(fighters.get(i).select("td:nth-child(9)").text().trim()));
-                fighter.setDraw(Integer.parseInt(fighters.get(i).select("td:nth-child(10)").text().trim()));
-
-                fighterRepository.save(fighter);
-                System.out.println("Fighter added");
-                break;
+        Document searchedFighter = Jsoup.connect(("http://ufcstats.com/fighter-details/" + statsId)).get();
+        Fighter fighter = new Fighter();
+        fighter.setWeight(weightClass);
+        String fighterName = searchedFighter.select("h2.b-content__title span:nth-child(1)").text().trim();
+        String first = fighterName.split(" ")[0];
+        String last = "";
+        for(int i = 1; i < fighterName.split(" ").length; i++){
+            if(i != fighterName.split(" ").length - 1){
+                last += fighterName.split(" ")[i] + " ";
+            } else {
+                last += fighterName.split(" ")[i];
             }
         }
+        fighter.setFirstName(first);
+        fighter.setLastName(last);
+        String record = searchedFighter.select("h2.b-content__title span:nth-child(2)").text().trim().split(" ")[1];
+        int win = Integer.parseInt(record.split("-")[0]);
+        int loss = Integer.parseInt(record.split("-")[1]);
+        int draw = Integer.parseInt(record.split("-")[2]);
+        fighter.setWin(win);
+        fighter.setLoss(loss);
+        fighter.setDraw(draw);
+        try{
+            fighter.setNickname(searchedFighter.select("p.b-content__Nickname").text().trim());
+        } catch (RuntimeException ignore){}
+
+        Fighter savedFighter = fighterRepository.saveAndFlush(fighter);
+        System.out.println("Fighter added");
+        return savedFighter;
+
+//        ArrayList<Element> fighters = searchFighter.select("tbody tr");
+//        fighters.removeFirst();
+//
+//        for(int i = 0; i < fighters.size(); i++){
+//            if(fighters.get(i).select("td:nth-child(1) a").text().trim().equals(firstName) && fighters.get(i).select("td:nth-child(2) a").text().trim().equals(lastName)){
+//                Fighter fighter = new Fighter();
+//                fighter.setUfcStatId(fighters.get(i).select("td:nth-child(1) a").attr("abs:href").split("/")[4]);
+//                fighter.setFirstName(fighters.get(i).select("td:nth-child(1)").text().trim());
+//                fighter.setLastName(fighters.get(i).select("td:nth-child(2)").text().trim());
+//                String nickName = fighters.get(i).select("td:nth-child(3)").text().trim();
+//                fighter.setWeight(weightClass);
+//                if (!nickName.isEmpty()) {
+//                    fighter.setNickname(fighters.get(i).select("td:nth-child(3)").text().trim());
+//                }
+//                String heightString = fighters.get(i).select("td:nth-child(4)").text().trim();
+//                int height = 0;
+//                if (!heightString.contains("--")) {
+//                    fighter.setHeight(height = parseHeight(heightString));
+//                }
+//                String reachString = fighters.get(i).select("td:nth-child(6)").text().trim();
+//                double reach = 0;
+//                if (!reachString.contains("--")) {
+//                    fighter.setReach(Double.parseDouble(fighters.get(i).select("td:nth-child(6)").text().trim().replace("\"", "")));
+//                }
+//                String stance = fighters.get(i).select("td:nth-child(7)").text().trim();
+//                if (!stance.isEmpty()) {
+//                    fighter.setStance(fighters.get(i).select("td:nth-child(7)").text().trim());
+//                }
+//                fighter.setWin(Integer.parseInt(fighters.get(i).select("td:nth-child(8)").text().trim()));
+//                fighter.setLoss(Integer.parseInt(fighters.get(i).select("td:nth-child(9)").text().trim()));
+//                fighter.setDraw(Integer.parseInt(fighters.get(i).select("td:nth-child(10)").text().trim()));
+//
+//                fighterRepository.save(fighter);
+//                System.out.println("Fighter added");
+//                break;
+//            }
+//        }
     }
 
     @Transactional

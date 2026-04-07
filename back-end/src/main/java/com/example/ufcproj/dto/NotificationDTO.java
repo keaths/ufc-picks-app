@@ -6,8 +6,8 @@ public record NotificationDTO(
         Long notificationId,
         String type,
         String message,
-        Long event_id,
-        Long fight_id,
+        EventSummaryDTO event_id,
+        FightCardDTO fight_id,
         boolean isRead,
         LocalDateTime createdAt
 ) {
