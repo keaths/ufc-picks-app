@@ -134,6 +134,7 @@ public class EventService {
     }
 
     public FighterSummaryDTO mapFighter(Fighter fighter){
+        System.out.println(fighter.getFirstName() + " " + fighter.getLastName());
         return new FighterSummaryDTO(
                 fighter.getFighterId(),
                 fighter.getFirstName(),
@@ -191,12 +192,13 @@ public class EventService {
     }
 
     private String convertLength(Integer length){
-        int feet = length % 12;
-        int inches = length - (6 * feet);
+        if(length == null){
+            return("-");
+        }
+        int feet = length / 12;
+        int inches = length  % 12;
 
-        String finalLength = "" + feet + "'" + inches;
-
-        return finalLength;
+        return feet + "'" + inches;
     }
 
 }

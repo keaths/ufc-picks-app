@@ -166,28 +166,37 @@ public class NotificationService {
                 )).toList();
     }
 
-    private EventSummaryDTO mapEvent(Event event){
-        System.out.println(event.getEventName());
-        EventSummaryDTO eventSummaryDTO = new EventSummaryDTO(event.getEventId(),
+    private EventSummaryDTO mapEvent(Event event) {
+        if (event == null) {
+            return null;
+        }
+
+        List<Fight> fights = event.getFights();
+
+        Fight featuredFight = null;
+        if (fights != null && !fights.isEmpty()) {
+            featuredFight = fights.stream()
+                    .filter(Objects::nonNull)
+                    .filter(f -> f.getBoutOrder() != null)
+                    .findFirst()
+                    .orElse(fights.stream()
+                            .filter(Objects::nonNull)
+                            .findFirst()
+                            .orElse(null));
+        }
+        return new EventSummaryDTO(
+                event.getEventId(),
                 event.getEventName(),
                 event.getEventDate(),
                 event.getLocation(),
                 event.isPicksLocked(),
-                event.getFights().getFirst().getIsTitleBout(),
-                mapFighter(Objects.requireNonNull(event.getFights().stream()
-                        .filter(f -> f.getBoutOrder() != null)
-                        .findFirst()
-                        .orElse(null)).getRedFighterId()),
-                mapFighter(Objects.requireNonNull(event.getFights().stream()
-                        .filter(f -> f.getBoutOrder() != null)
-                        .findFirst()
-                        .orElse(null)).getBlueFighterId()),
+                featuredFight != null && Boolean.TRUE.equals(featuredFight.getIsTitleBout()),
+                featuredFight != null ? mapFighter(featuredFight.getRedFighterId()) : null,
+                featuredFight != null ? mapFighter(featuredFight.getBlueFighterId()) : null,
                 picksRepository.countByUserUserIdAndFightEventEventId(1L, event.getEventId()),
-                event.getFights().size(),
+                fights != null ? fights.size() : 0,
                 picksRepository.getCorrectPicksforEvent(1L, event.getEventId())
         );
-
-        return eventSummaryDTO;
     }
 
     public FighterSummaryDTO mapFighter(Fighter fighter){
@@ -245,6 +254,9 @@ public class NotificationService {
     }
 
     private String convertLength(Integer length){
+        if(length == null){
+            return "";
+        }
         int feet = length % 12;
         int inches = length - (6 * feet);
 

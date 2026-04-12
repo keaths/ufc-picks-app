@@ -17,6 +17,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByStatus(Event.Status status);
 
+    @Query(value = """
+     Select *
+        from events
+        where status = :status
+""", nativeQuery = true)
+    Event findInProgress(Event.Status status);
+
     List<Event> findByStatusOrStatus(Event.Status status1, Event.Status status2);
 
     Event findByEventDate(LocalDate date);

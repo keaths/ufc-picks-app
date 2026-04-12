@@ -121,7 +121,7 @@ public class UfcUpdateJobService {
         LocalDate today = LocalDate.now(ZoneId.of("America/New_York"));
         Event upcomingEvent = eventRepository.findByStatusAndEventDate(Event.Status.SCHEDULED, today);
         if(upcomingEvent == null){
-            upcomingEvent = eventRepository.findByStatusAndEventDate(Event.Status.IN_PROGRESS, today);
+            upcomingEvent = eventRepository.findInProgress(Event.Status.IN_PROGRESS);
             if(upcomingEvent == null){
                 System.out.println("No fights today");
                 return;
@@ -438,6 +438,7 @@ public class UfcUpdateJobService {
 
         Document searchedFighter = Jsoup.connect(("http://ufcstats.com/fighter-details/" + statsId)).get();
         Fighter fighter = new Fighter();
+        fighter.setUfcStatId(statsId);
         fighter.setWeight(weightClass);
         String fighterName = searchedFighter.select("h2.b-content__title span:nth-child(1)").text().trim();
         String first = fighterName.split(" ")[0];
